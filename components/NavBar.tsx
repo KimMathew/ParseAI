@@ -5,8 +5,9 @@ export default function NavBar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="w-full">
-      <nav className="w-full max-w-5xl mx-auto px-6 py-3 flex items-center justify-between rounded-full bg-white/5 border border-white/10 backdrop-blur-md shadow-md mt-8">
+    // fixed container keeps nav visible while scrolling and centered
+    <div className="fixed inset-x-0 top-6 z-40 pointer-events-auto px-6">
+      <nav className="mx-auto w-full max-w-5xl px-6 py-3 flex items-center justify-between rounded-full bg-white/6 border border-white/8 backdrop-blur-md shadow-sm">
         {/* left: logo */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 flex items-center justify-center rounded-full bg-white/8 backdrop-blur-sm">
@@ -28,7 +29,7 @@ export default function NavBar() {
           <li><a href="#" className="text-white/80 hover:text-white transition">How it Works</a></li>
           <li><a href="#" className="text-white/80 hover:text-white transition">Login</a></li>
           <li>
-            <a href="#" className="inline-block px-4 py-2 rounded-full bg-linear-to-r from-indigo-500 to-purple-500 text-white font-medium shadow-sm hover:opacity-95 transition">Sign Up</a>
+            <a href="#" className="inline-block px-4 py-2 rounded-full bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white font-medium shadow-sm hover:opacity-95 transition">Sign Up</a>
           </li>
         </ul>
 
@@ -52,17 +53,17 @@ export default function NavBar() {
         </button>
       </nav>
 
-      {/* mobile dropdown panel */}
+      {/* mobile dropdown panel (positioned below the fixed nav) */}
       {open && (
-        <div className="md:hidden mt-3 max-w-5xl mx-auto px-6">
+        <div className="md:hidden mt-8 mx-auto max-w-5xl px-6">
           <div className="rounded-2xl bg-white/4 border border-white/8 backdrop-blur-md p-4 space-y-2 text-center">
             <a href="#" onClick={() => setOpen(false)} className="block px-3 py-2 rounded hover:bg-white/5 transition">Home</a>
             <a href="#" onClick={() => setOpen(false)} className="block px-3 py-2 rounded hover:bg-white/5 transition">How it Works</a>
             <a href="#" onClick={() => setOpen(false)} className="block px-3 py-2 rounded hover:bg-white/5 transition">Login</a>
-            <a href="#" onClick={() => setOpen(false)} className="block px-3 py-2 rounded-full bg-linear-to-r from-indigo-500 to-purple-500 text-white text-center font-medium">Sign Up</a>
+            <a href="#" onClick={() => setOpen(false)} className="block px-3 py-2 rounded-full bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white text-center font-medium">Sign Up</a>
           </div>
         </div>
       )}
-    </header>
+    </div>
   );
 }
