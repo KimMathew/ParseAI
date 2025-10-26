@@ -1,65 +1,162 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import React, { useState } from "react";
+
+type SummaryMap = Record<string, string>;
+
+export default function ResearchSummarizer() {
+  const [text, setText] = useState<string>("");
+  const [file, setFile] = useState<File | null>(null);
+  const [summaries, setSummaries] = useState<SummaryMap | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Safe file handler (e.target.files can be null)
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0] ?? null;
+    setFile(f);
+    if (f) setText(""); // clear text input when file chosen
+  };
+
+  // Submit either text or file to the Flask backend
+  const handleSubmit = async () => {
+    setError(null);
+    setSummaries(null);
+
+    if (!file && !text.trim()) {
+      setError("Please provide paper text or upload a PDF file.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      let res: Response;
+
+      if (file) {
+        const fd = new FormData();
+        fd.append("file", file);
+        res = await fetch("http://127.0.0.1:8000/summarize", {
+          method: "POST",
+          body: fd,
+        });
+      } else {
+        res = await fetch("http://127.0.0.1:8000/summarize", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
+        });
+      }
+
+      if (!res.ok) {
+        const textBody = await res.text();
+        throw new Error(`Server error ${res.status}: ${textBody}`);
+      }
+
+      // Expecting an object mapping section-title -> string
+      const data = await res.json();
+
+      // Defensive normalization: coerce values to strings and provide fallback
+      const normalized: SummaryMap = {};
+      if (data && typeof data === "object") {
+        Object.entries(data).forEach(([k, v]) => {
+          let value = "";
+          if (v === null || typeof v === "undefined") value = "";
+          else if (typeof v === "string") value = v;
+          else value = String(v);
+          // sensible fallback if backend left it empty
+          normalized[k] =
+            value.trim() && value.toLowerCase() !== "unknown"
+              ? value.trim()
+              : "Section not found or too short for summarization.";
+        });
+      }
+
+      setSummaries(normalized);
+    } catch (err: any) {
+      console.error(err);
+      setError(err?.message ?? "An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const clearAll = () => {
+    setText("");
+    setFile(null);
+    setSummaries(null);
+    setError(null);
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="max-w-3xl mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-4">Research Paper Summarizer</h1>
+
+      <div className="space-y-4">
+        <label className="block">
+          <span className="text-sm font-medium">Paste paper text</span>
+          <textarea
+            value={text}
+            onChange={(e) => {
+              setText(e.target.value);
+              if (e.target.value) setFile(null); // prefer text if typed
+            }}
+            rows={8}
+            className="mt-2 w-full p-3 border rounded"
+            placeholder="Paste full paper text (or upload a PDF below)..."
+          />
+        </label>
+
+        <label className="block">
+          <span className="text-sm font-medium">Or upload PDF</span>
+          <input
+            type="file"
+            accept="application/pdf"
+            onChange={handleFileChange}
+            className="mt-2"
+          />
+          {file && <div className="text-sm mt-1">Selected: {file.name}</div>}
+        </label>
+
+        <div className="flex gap-2">
+          <button
+            onClick={handleSubmit}
+            disabled={loading}
+            className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-60"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            {loading ? "Summarizing..." : "Summarize"}
+          </button>
+
+          <button
+            onClick={clearAll}
+            className="px-4 py-2 border rounded"
+            disabled={loading}
           >
-            Documentation
-          </a>
+            Clear
+          </button>
         </div>
-      </main>
+
+        {error && (
+          <div className="mt-2 text-sm text-red-600">
+            <strong>Error:</strong> {error}
+          </div>
+        )}
+      </div>
+
+      <hr className="my-6" />
+
+      {summaries ? (
+        <div className="space-y-4">
+          {Object.entries(summaries).map(([section, content]) => (
+            <div key={section} className="p-4 border rounded">
+              <h2 className="font-semibold text-blue-700">{section}</h2>
+              <p className="mt-2 text-white-800 whitespace-pre-line">{content}</p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-sm text-gray-500">No summary yet.</div>
+      )}
     </div>
   );
 }
