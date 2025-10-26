@@ -29,7 +29,7 @@ export default function NavBar() {
           <li><a href="#" className="text-white/80 hover:text-white transition">How it Works</a></li>
           <li><a href="#" className="text-white/80 hover:text-white transition">Login</a></li>
           <li>
-            <a href="#" className="inline-block px-4 py-2 rounded-full bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white font-medium shadow-sm hover:opacity-95 transition">Sign Up</a>
+            <a href="#" className="inline-block px-4 py-2 rounded-full bg-linear-to-r from-[#6366F1] to-[#8B5CF6] text-white font-medium shadow-sm hover:opacity-95 transition">Sign Up</a>
           </li>
         </ul>
 
@@ -60,7 +60,7 @@ export default function NavBar() {
             <a href="#" onClick={() => setOpen(false)} className="block px-3 py-2 rounded hover:bg-white/5 transition">Home</a>
             <a href="#" onClick={() => setOpen(false)} className="block px-3 py-2 rounded hover:bg-white/5 transition">How it Works</a>
             <a href="#" onClick={() => setOpen(false)} className="block px-3 py-2 rounded hover:bg-white/5 transition">Login</a>
-            <a href="#" onClick={() => setOpen(false)} className="block px-3 py-2 rounded-full bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white text-center font-medium">Sign Up</a>
+            <a href="#" onClick={() => setOpen(false)} className="block px-3 py-2 rounded-full bg-linear-to-r from-[#6366F1] to-[#8B5CF6] text-white text-center font-medium">Sign Up</a>
           </div>
         </div>
       )}

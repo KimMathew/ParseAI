@@ -2,6 +2,7 @@
 
 import NavBar from "../components/NavBar";
 import Aurora from "../components/Aurora";
+import FeatureCard from "../components/FeatureCard";
 
 export default function Home() {
   // Placeholder click handler — replace with router.push('/summarize') or a <Link> when the page exists
@@ -19,9 +20,9 @@ export default function Home() {
       <NavBar />
 
       {/* Hero section */}
-      <section className="relative min-h-screen">
+      <section className="relative">
           {/* aurora canvas positioned behind content (no negative z so it stays above page background) */}
-          <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+          <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden min-h-screen">
             <Aurora colorStops={["#6366F1", "#22D3EE", "#8B5CF6"]} amplitude={1.2} blend={0.6} />
           </div>
 
@@ -34,20 +35,80 @@ export default function Home() {
 
               <div className="mt-10 flex items-center justify-center gap-6">
                 <a
-                  className="inline-block px-6 py-3 rounded-full bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white font-medium transition-all duration-200 ease-out transform hover:scale-105 hover:shadow-xl hover:brightness-105 focus:outline-none focus:ring-4 focus:ring-[#6366F140] active:scale-95 cursor-pointer"
+                  className="inline-block px-6 py-3 rounded-full bg-linear-to-r from-[#6366F1] to-[#8B5CF6] text-white font-medium transition-all duration-200 ease-out transform hover:scale-105 hover:shadow-xl hover:brightness-105 focus:outline-none focus:ring-4 focus:ring-[#6366F140] active:scale-95 cursor-pointer"
                   role="button"
                   onClick={handleTrySummarization}
                 >
                   Try Summarization
                 </a>
-                <a className="inline-block px-6 py-3 rounded-full border border-white/10 text-white/80">Explore Features</a>
+                <a
+                  href="#features"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const el = document.getElementById('features');
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                  className="inline-block px-6 py-3 rounded-full border border-white/10 text-white/80 cursor-pointer transition-all duration-200 ease-out hover:bg-white/4 hover:border-white/20 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-[#6366F120]"
+                >
+                  Explore Features
+                </a>
               </div>
             </div>
           </div>
         </div>
       </section>
 
+      {/* Features section (inlined) */}
+      <section className="relative py-16">
+          <div className="max-w-5xl mx-auto px-6 flex flex-col items-center" id="features">
+          <h2 className="text-center text-3xl md:text-4xl font-extrabold mb-14">
+            Powerful tools that make research simple.
+          </h2>
 
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Left large card (spans 2 cols on md) - uses first aurora color */}
+            <FeatureCard
+              outerClass="relative md:col-span-2 group h-full"
+              glowColor="#6366F1"
+              cardStyle={{
+                background: 'linear-gradient(135deg, rgba(99,102,241,0.8) 0%, rgba(78,70,197,0.8) 60%, rgba(45,42,120,1) 100%)',
+                boxShadow: '0 36px 80px rgba(99,102,241,0.16), inset 0 1px 0 rgba(255,255,255,0.03)'
+              }}
+              title="Understand any paper in seconds"
+              description="PARSe AI instantly extracts the Abstract, Methods, Results, and Conclusion of any research paper — turning dense studies into clear, structured insights you can digest fast."
+            />
+
+            {/* Right small card - uses second aurora color */}
+            <FeatureCard
+              outerClass="relative group h-full"
+              glowColor="#22D3EE"
+              cardStyle={{
+                background: 'linear-gradient(160deg, rgba(34,211,238,0.8) 0%, rgba(24,170,190,0.8) 60%, rgba(8,120,130,1) 100%)',
+                boxShadow: '0 36px 80px rgba(34,211,238,0.14), inset 0 1px 0 rgba(255,255,255,0.03)'
+              }}
+              title="Plain‑English Summaries"
+              description="Automatically simplify jargon and explain complex ideas for quick understanding."
+            />
+
+            {/* Bottom full-width card - uses third aurora color */}
+            <FeatureCard
+              outerClass="relative md:col-span-3 group"
+              glowColor="#8B5CF6"
+              cardStyle={{
+                background: 'linear-gradient(135deg, rgba(139,92,246,0.8) 0%, rgba(105,70,200,0.8) 60%, rgba(70,42,160,1) 100%)',
+                boxShadow: '0 36px 80px rgba(139,92,246,0.16), inset 0 1px 0 rgba(255,255,255,0.03)'
+              }}
+              title="Chat with your paper like a real expert"
+              description="Once logged in, start an AI-powered chat that lets you ask follow-up questions, clarify concepts, or explore related ideas — directly based on the paper’s content."
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* How it Work Section */}
+      <section className="relative py-16">
+        
+      </section>
     </main>
   );
 }
