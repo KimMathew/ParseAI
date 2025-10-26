@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "./scroll-stack-animations.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -128,5 +129,19 @@ body {
   }
   body {
     @apply bg-background text-foreground overflow-x-hidden;
+  }
+}
+
+@layer components {
+  /* Fade-up animation performance optimization */
+  [class*="fade-up"],
+  section > div > div {
+    will-change: auto;
+  }
+
+  /* Enable GPU acceleration during animations */
+  section > div > div > * {
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
   }
 }

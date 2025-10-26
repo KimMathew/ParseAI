@@ -1,10 +1,18 @@
 "use client";
 
+import { useFadeUpAnimation } from "@/lib/useFadeUpAnimation";
 import NavBar from "../components/NavBar";
 import Aurora from "../components/Aurora";
 import FeatureCard from "../components/FeatureCard";
+import ScrollStackCard from "../components/ScrollStackCard";
 
 export default function Home() {
+  // Fade-up animation refs for each section
+  const heroRef = useFadeUpAnimation({ delay: 0, stagger: 0.15 });
+  const featuresHeaderRef = useFadeUpAnimation({ delay: 0.1, stagger: 0.1 });
+  const featureCardsRef = useFadeUpAnimation({ delay: 0.2, stagger: 0.2 });
+  const howItWorksHeaderRef = useFadeUpAnimation({ delay: 0.1, stagger: 0.1 });
+
   // Placeholder click handler — replace with router.push('/summarize') or a <Link> when the page exists
   const handleTrySummarization = () => {
     // TODO: navigate to the summarization page, e.g. using Next.js router:
@@ -26,7 +34,7 @@ export default function Home() {
             <Aurora colorStops={["#6366F1", "#22D3EE", "#8B5CF6"]} amplitude={1.2} blend={0.6} />
           </div>
 
-          <div className="relative z-20 max-w-5xl mx-auto px-6 pt-28">
+          <div ref={heroRef} className="relative z-20 max-w-5xl mx-auto px-6 pt-28">
             <div className="rounded-xl px-6 py-20">
               <div className="text-center">
               <p className="inline-block px-4 py-1 rounded-full bg-white/6 text-sm mb-6">Instant AI research summarization</p>
@@ -61,11 +69,13 @@ export default function Home() {
       {/* Features section (inlined) */}
       <section className="relative py-16">
           <div className="max-w-5xl mx-auto px-6 flex flex-col items-center" id="features">
-          <h2 className="text-center text-3xl md:text-4xl font-extrabold mb-14">
-            Powerful tools that make research simple.
-          </h2>
+          <div ref={featuresHeaderRef}>
+            <h2 className="text-center text-3xl md:text-4xl font-extrabold mb-14">
+              Powerful tools that make research simple.
+            </h2>
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div ref={featureCardsRef} className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Left large card (spans 2 cols on md) - uses first aurora color */}
             <FeatureCard
               outerClass="relative md:col-span-2 group h-full"
@@ -105,9 +115,56 @@ export default function Home() {
         </div>
       </section>
 
-      {/* How it Work Section */}
-      <section className="relative py-16">
-        
+      {/* How it Works Section */}
+      <section className="relative py-32">
+        <div className="max-w-5xl mx-auto px-6 flex flex-col items-center" id="how-it-works">
+          <div ref={howItWorksHeaderRef}>
+            <h2 className="text-center text-3xl md:text-4xl font-extrabold mb-4">
+              How It Works
+            </h2>
+            <p className="text-center text-white/60 text-lg mb-16 max-w-2xl mx-auto">
+              Three simple steps to transform your research experience
+            </p>
+          </div>
+
+          <div className="w-full relative space-y-6">
+            <ScrollStackCard
+              stepNumber={1}
+              totalSteps={3}
+              glowColor="#6366F1"
+              cardStyle={{
+                background: 'linear-gradient(135deg, rgba(99,102,241,0.8) 0%, rgba(78,70,197,0.8) 60%, rgba(45,42,120,1) 100%)',
+                boxShadow: '0 36px 80px rgba(99,102,241,0.16), inset 0 1px 0 rgba(255,255,255,0.03)'
+              }}
+              title="Upload Your Research"
+              description="Easily upload a PDF or paste your research paper text directly into PARSe AI. Our system accepts multiple formats and handles files of any length."
+            />
+
+            <ScrollStackCard
+              stepNumber={2}
+              totalSteps={3}
+              glowColor="#22D3EE"
+              cardStyle={{
+                background: 'linear-gradient(160deg, rgba(34,211,238,0.8) 0%, rgba(24,170,190,0.8) 60%, rgba(8,120,130,1) 100%)',
+                boxShadow: '0 36px 80px rgba(34,211,238,0.14), inset 0 1px 0 rgba(255,255,255,0.03)'
+              }}
+              title="AI Analyzes in Seconds"
+              description="Our advanced AI engine instantly processes your paper, extracting key findings, methodologies, and results. Powered by state-of-the-art language models."
+            />
+
+            <ScrollStackCard
+              stepNumber={3}
+              totalSteps={3}
+              glowColor="#8B5CF6"
+              cardStyle={{
+                background: 'linear-gradient(135deg, rgba(139,92,246,0.8) 0%, rgba(105,70,200,0.8) 60%, rgba(70,42,160,1) 100%)',
+                boxShadow: '0 36px 80px rgba(139,92,246,0.16), inset 0 1px 0 rgba(255,255,255,0.03)'
+              }}
+              title="Get Clear Insights"
+              description="Receive a beautifully formatted summary with key takeaways, plain-English explanations, and the ability to chat with an AI expert about the paper."
+            />
+          </div>
+        </div>
       </section>
     </main>
   );
