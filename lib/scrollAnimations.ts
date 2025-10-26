@@ -33,7 +33,7 @@ export function createScrollStackAnimation({
             trigger: containerElement,
             start: `top ${startPercentage}%`,
             end: `top ${endPercentage}%`,
-            scrub: 0.6,
+            scrub: 1, // Increased from 0.6 for smoother, less jittery animation
             markers: false,
         },
     });
@@ -67,24 +67,22 @@ export function createScrollStackAnimation({
             0
         );
 
-    // Animate glow intensity if provided
+    // Animate glow intensity if provided (optimized - removed blur animation)
     if (glowElement) {
         gsap.fromTo(
             glowElement,
             {
                 opacity: 0.4,
-                filter: "blur(20px)",
             },
             {
                 opacity: 0.9,
-                filter: "blur(30px)",
                 duration: 1,
                 ease: "power2.out",
                 scrollTrigger: {
                     trigger: containerElement,
                     start: `top ${startPercentage}%`,
                     end: `top ${endPercentage}%`,
-                    scrub: 0.6,
+                    scrub: 1, // Matched with main animation for consistency
                     markers: false,
                 },
             }

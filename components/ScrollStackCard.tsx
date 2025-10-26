@@ -30,8 +30,9 @@ export default function ScrollStackCard({
 
     const card = cardRef.current;
     const container = containerRef.current;
+    // Get the first glow element specifically (the main background glow)
     const glowElement = card.querySelector<HTMLElement>(
-      "[aria-hidden='true']"
+      ".scroll-stack-glow"
     ) || undefined;
 
     // Create scroll stack animation
@@ -55,10 +56,10 @@ export default function ScrollStackCard({
           transformOrigin: "center bottom",
         }}
       >
-        {/* Glow background */}
+        {/* Glow background - static blur for better performance */}
         <div
           aria-hidden
-          className="absolute -inset-4 rounded-2xl blur-3xl opacity-75 transition-all duration-300 group-hover:opacity-100 group-hover:blur-2xl"
+          className="scroll-stack-glow absolute inset-1 rounded-2xl blur-xl opacity-75 transition-all duration-300 group-hover:opacity-100"
           style={{ backgroundColor: glowColor }}
         />
 

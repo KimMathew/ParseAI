@@ -70,9 +70,12 @@ export default function Home() {
       <section className="relative py-16">
           <div className="max-w-5xl mx-auto px-6 flex flex-col items-center" id="features">
           <div ref={featuresHeaderRef}>
-            <h2 className="text-center text-3xl md:text-4xl font-extrabold mb-14">
+            <h2 className="text-center text-3xl md:text-4xl font-extrabold mb-4">
               Powerful tools that make research simple.
             </h2>
+            <p className="text-center text-white/60 text-lg mb-16 max-w-2xl mx-auto">
+              Three intelligent tools designed to simplify the way you read, understand, and interact with research papers.
+            </p>
           </div>
 
           <div ref={featureCardsRef} className="grid grid-cols-1 md:grid-cols-3 gap-6">
