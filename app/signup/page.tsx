@@ -50,7 +50,7 @@ export default function Signup() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold mb-2">Create PARSeAI Account</h1>
-          <p className="text-white/60 text-sm">Access your research summaries and chat</p>
+          <p className="text-white/60 text-sm">Join us and unlock intelligent research insights.</p>
         </div>
 
         {/* Signup Form */}

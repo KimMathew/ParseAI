@@ -67,9 +67,7 @@ export default function NavBar() {
             </a>
           </li>
           <li><button onClick={() => router.push(ROUTES.SIGNIN)} className="text-white/80 hover:text-white transition cursor-pointer">Sign in</button></li>
-          <li>
-            <a href="#" className="inline-block px-4 py-2 rounded-full bg-linear-to-r from-[#6366F1] to-[#8B5CF6] text-white font-medium shadow-sm hover:opacity-95 transition">Sign Up</a>
-          </li>
+          <li><button onClick={() => router.push(ROUTES.SIGNUP)} className="inline-block px-4 py-2 rounded-full bg-linear-to-r from-[#6366F1] to-[#8B5CF6] text-white font-medium shadow-sm hover:opacity-95 transition cursor-pointer">Sign Up</button></li>
         </ul>
 
         {/* mobile menu button */}
@@ -119,7 +117,7 @@ export default function NavBar() {
               How it Works
             </a>
             <button onClick={() => { router.push(ROUTES.SIGNIN); setOpen(false); }} className="block w-full px-3 py-2 rounded hover:bg-white/5 transition cursor-pointer text-left">Sign in</button>
-            <a href="#" onClick={() => setOpen(false)} className="block px-3 py-2 rounded-full bg-linear-to-r from-[#6366F1] to-[#8B5CF6] text-white text-center font-medium">Sign Up</a>
+            <button onClick={() => { router.push(ROUTES.SIGNUP); setOpen(false); }} className="block w-full px-3 py-2 rounded-full bg-linear-to-r from-[#6366F1] to-[#8B5CF6] text-white text-center font-medium">Sign Up</button>
           </div>
         </div>
       )}

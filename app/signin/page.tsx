@@ -49,7 +49,7 @@ export default function Signin() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold mb-2">Sign in to PARSeAI</h1>
-          <p className="text-white/60 text-sm">Access your research summaries and chat</p>
+          <p className="text-white/60 text-sm">Welcome back. Enter your credentials to continue.</p>
         </div>
 
         {/* Login Form */}
