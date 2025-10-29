@@ -5,6 +5,7 @@ import NavBar from "../components/NavBar";
 import Aurora from "../components/Aurora";
 import FeatureCard from "../components/FeatureCard";
 import ScrollStackCard from "../components/ScrollStackCard";
+import Footer from "../components/Footer";
 
 export default function Home() {
   // Fade-up animation refs for each section
@@ -28,7 +29,7 @@ export default function Home() {
       <NavBar />
 
       {/* Hero section */}
-      <section className="relative">
+      <section className="relative" id="hero">
           {/* aurora canvas positioned behind content (no negative z so it stays above page background) */}
           <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden min-h-screen">
             <Aurora colorStops={["#6366F1", "#22D3EE", "#8B5CF6"]} amplitude={1.2} blend={0.6} />
@@ -67,7 +68,7 @@ export default function Home() {
       </section>
 
       {/* Features section (inlined) */}
-      <section className="relative py-16">
+      <section className="relative py-16 scroll-mt-20" id="features">
           <div className="max-w-5xl mx-auto px-6 flex flex-col items-center" id="features">
           <div ref={featuresHeaderRef}>
             <h2 className="text-center text-3xl md:text-4xl font-extrabold mb-4">
@@ -119,7 +120,7 @@ export default function Home() {
       </section>
 
       {/* How it Works Section */}
-      <section className="relative py-32">
+      <section className="relative pt-16 pb-32 scroll-mt-20" id="how-it-works">
         <div className="max-w-5xl mx-auto px-6 flex flex-col items-center" id="how-it-works">
           <div ref={howItWorksHeaderRef}>
             <h2 className="text-center text-3xl md:text-4xl font-extrabold mb-4">
@@ -169,6 +170,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <Footer />
     </main>
   );
 }
