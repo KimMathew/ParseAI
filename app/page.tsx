@@ -74,6 +74,7 @@ export default function ResearchSummarizer() {
         res = await fetch("http://127.0.0.1:8000/summarize", {
           method: "POST",
           body: fd,
+          cache: "no-store",
         });
       } else {
         res = await fetch("http://127.0.0.1:8000/summarize", {
@@ -121,6 +122,36 @@ export default function ResearchSummarizer() {
     setFile(null);
     setSummaries(null);
     setError(null);
+  };
+
+  // Always show these key sections as cards
+  const keySections = [
+    "Abstract",
+    "Introduction",
+    "Methodology",
+    "Results",
+    "Conclusion",
+  ];
+
+  // Helper to get summary for a section or fallback
+  const getSectionSummary = (section: string) => {
+    if (summaries && summaries[section]) {
+      return summaries[section];
+    }
+    // Try alternate section names for Methodology/Results/Conclusion
+    if (summaries) {
+      if (section === "Methodology") {
+        if (summaries["Methods"]) return summaries["Methods"];
+        if (summaries["Method"]) return summaries["Method"];
+      }
+      if (section === "Results") {
+        if (summaries["Result"]) return summaries["Result"];
+      }
+      if (section === "Conclusion") {
+        if (summaries["Conclusions"]) return summaries["Conclusions"];
+      }
+    }
+    return "Section not found or too short for summarization.";
   };
 
   return (
@@ -243,18 +274,23 @@ export default function ResearchSummarizer() {
 
       {/* Summaries output ...existing code... */}
       <hr className="my-6" />
-      {summaries ? (
-        <div className="space-y-4">
-          {Object.entries(summaries).map(([section, content]) => (
+      <div className="space-y-4">
+        {keySections.map((section) => (
+          <div key={section} className="p-4 border rounded">
+            <h2 className="font-semibold text-blue-700">{section}</h2>
+            <p className="mt-2 text-white-800 whitespace-pre-line">{getSectionSummary(section)}</p>
+          </div>
+        ))}
+        {/* Show any other sections returned by backend that aren't in keySections */}
+        {summaries && Object.keys(summaries)
+          .filter((section) => !keySections.includes(section))
+          .map((section) => (
             <div key={section} className="p-4 border rounded">
               <h2 className="font-semibold text-blue-700">{section}</h2>
-              <p className="mt-2 text-white-800 whitespace-pre-line">{content}</p>
+              <p className="mt-2 text-white-800 whitespace-pre-line">{summaries[section]}</p>
             </div>
           ))}
-        </div>
-      ) : (
-        <div className="text-sm text-gray-500">No summary yet.</div>
-      )}
+      </div>
     </div>
   );
 }

@@ -6,6 +6,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.document_transformers import EmbeddingsClusteringFilter
 from langchain_huggingface import HuggingFaceEmbeddings
+import re
 
 app = Flask(__name__)
 CORS(app)
@@ -40,31 +41,42 @@ def summarize_document_with_kmeans_clustering(file, llm, embeddings):
     try:
         result = filter.transform_documents(documents=texts)
         full_text = "\n".join([doc.page_content for doc in result])
-        import re
-        section_pattern = re.compile(r"^(abstract|introduction|background|methods?|methodology|results?|discussion|conclusion|references?)\b", re.IGNORECASE | re.MULTILINE)
-        matches = list(section_pattern.finditer(full_text))
-        sections = {}
-        if matches:
-            for i, match in enumerate(matches):
-                start = match.start()
-                end = matches[i+1].start() if i+1 < len(matches) else len(full_text)
-                section_name = match.group(0).strip().capitalize()
-                section_text = full_text[start:end].strip()
-                sections[section_name] = section_text
-        else:
-            sections["Full Document"] = full_text
-        summaries = {}
-        for section, content in sections.items():
-            prompt = f"Summarize the {section} section of this research paper:\n{content}"
-            try:
-                summary = llm.invoke(prompt)
-                if hasattr(summary, 'content'):
-                    summary = summary.content
-                else:
-                    summary = str(summary)
-            except Exception as e:
-                summary = f"Error summarizing section: {str(e)}"
-            summaries[section] = summary
+        key_sections = ["Abstract", "Introduction", "Methodology", "Results", "Conclusion"]
+        prompt = (
+            "For the research paper text below, extract and summarize ONLY the following sections: "
+            "Abstract, Introduction, Methodology, Results, Conclusion. "
+            "If a section is not present, do NOT mention it at all. Don't include any other sections. "
+            "For each section found, output the section name as a markdown heading with double asterisks (e.g., **Section**) followed by its summary as a single paragraph. "
+            "Do NOT use bullet points, numbered lists, or any introductory comments. "
+            f"This is the text:\n{full_text}"
+        )
+        print("[DEBUG] LLM Prompt:\n", prompt[:1000], "..." if len(prompt) > 1000 else "")
+        try:
+            response = llm.invoke(prompt)
+            print("[DEBUG] LLM Raw Response:\n", response)
+            if hasattr(response, 'content'):
+                response = response.content
+            # Extract sections using double asterisk markdown headings
+            summaries = {}
+            for section in key_sections:
+                pattern = re.compile(rf"\*\*{section}\*\*\s*\n+(.*?)(?=\n\*\*|\Z)", re.IGNORECASE | re.DOTALL)
+                match = pattern.search(response)
+                if match:
+                    raw_summary = match.group(1).strip()
+                    # Remove numbered points (e.g., 1. ... 2. ...)
+                    paragraph = re.sub(r"\n?\d+\.\s+\*\*.*?\*\*:?\s*", " ", raw_summary)
+                    paragraph = re.sub(r"\n?\d+\.\s+", " ", paragraph)
+                    # Remove extra newlines and join lines
+                    paragraph = " ".join(paragraph.splitlines())
+                    # Remove references leaking into conclusion
+                    if section == "Conclusion":
+                        # Remove everything after 'References:' or 'References\n'
+                        paragraph = re.split(r"references:?\s*", paragraph, flags=re.IGNORECASE)[0].strip()
+                    summaries[section] = paragraph.strip()
+            print("[DEBUG] Parsed JSON from markdown headings (post-processed):\n", summaries)
+        except Exception as e:
+            print("[ERROR] LLM invocation failed:\n", e)
+            summaries = {"error": f"Error extracting sections: {str(e)}"}
         return summaries
     except Exception as e:
         return {"error": str(e)}
