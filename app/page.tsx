@@ -29,7 +29,7 @@ export default function Home() {
       <NavBar />
 
       {/* Hero section */}
-      <section className="relative" id="hero">
+      <section className="relative min-h-screen" id="hero">
           {/* aurora canvas positioned behind content (no negative z so it stays above page background) */}
           <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden min-h-screen">
             <Aurora colorStops={["#6366F1", "#22D3EE", "#8B5CF6"]} amplitude={1.2} blend={0.6} />
@@ -57,7 +57,7 @@ export default function Home() {
                     const el = document.getElementById('features');
                     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
                   }}
-                  className="inline-block px-6 py-3 rounded-full border border-white/10 text-white/80 cursor-pointer transition-all duration-200 ease-out hover:bg-white/4 hover:border-white/20 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-[#6366F120]"
+                  className="inline-block px-6 py-3 rounded-full border border-white/10 text-white/80 cursor-pointer transition-all duration-200 ease-out hover:bg-white/4 hover:border-white/20"
                 >
                   Explore Features
                 </a>
