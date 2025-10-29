@@ -6,6 +6,8 @@ import Aurora from "../components/Aurora";
 import FeatureCard from "../components/FeatureCard";
 import ScrollStackCard from "../components/ScrollStackCard";
 import Footer from "../components/Footer";
+import { useRouter } from "next/navigation";
+import { ROUTES } from "@/lib/route";
 
 export default function Home() {
   // Fade-up animation refs for each section
@@ -14,14 +16,11 @@ export default function Home() {
   const featureCardsRef = useFadeUpAnimation({ delay: 0.2, stagger: 0.2 });
   const howItWorksHeaderRef = useFadeUpAnimation({ delay: 0.1, stagger: 0.1 });
 
-  // Placeholder click handler — replace with router.push('/summarize') or a <Link> when the page exists
+  const router = useRouter();
+  
   const handleTrySummarization = () => {
-    // TODO: navigate to the summarization page, e.g. using Next.js router:
-    // const router = useRouter();
-    // router.push('/summarize');
-    // For now this is a no-op placeholder so you can paste the actual path later.
-    /* eslint-disable no-console */
-    console.log('Try Summarization clicked — replace with navigation');
+    router.push(ROUTES.SIGNIN);
+    
   };
 
   return (
