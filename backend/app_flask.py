@@ -43,12 +43,13 @@ def summarize_document_with_kmeans_clustering(file, llm, embeddings):
         full_text = "\n".join([doc.page_content for doc in result])
         key_sections = ["Abstract", "Introduction", "Methodology", "Results", "Conclusion"]
         prompt = (
-            "For the research paper text below, extract and summarize ONLY the following sections: "
+            f"This is the text:\n{full_text}"
+            "For the research paper text above, extract and summarize ONLY the following sections: "
             "Abstract, Introduction, Methodology, Results, Conclusion. "
             "If a section is not present, do NOT mention it at all. Don't include any other sections. "
             "For each section found, output the section name as a markdown heading with double asterisks (e.g., **Section**) followed by its summary as a single paragraph. "
             "Do NOT use bullet points, numbered lists, or any introductory comments. "
-            f"This is the text:\n{full_text}"
+            
         )
         print("[DEBUG] LLM Prompt:\n", prompt[:1000], "..." if len(prompt) > 1000 else "")
         try:
