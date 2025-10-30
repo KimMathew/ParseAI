@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "PARSe AI",
   description: "Understand any research paper in seconds",
+  icons: {
+    icon: "/images/parseai-logo.png",
+  },
 };
 
 export default function RootLayout({

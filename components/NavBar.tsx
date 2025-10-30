@@ -26,16 +26,11 @@ export default function NavBar() {
             }}
             className="flex items-center gap-3 cursor-pointer"
           >
-            <div className="w-10 h-10 flex items-center justify-center rounded-full bg-white/8 backdrop-blur-sm">
-              {/* simple spark/logo SVG */}
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-                <path d="M12 2v4" stroke="white" strokeOpacity="0.9" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M12 18v4" stroke="white" strokeOpacity="0.9" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M4.93 4.93l2.83 2.83" stroke="white" strokeOpacity="0.85" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M16.24 16.24l2.83 2.83" stroke="white" strokeOpacity="0.85" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-                <circle cx="12" cy="12" r="3.2" stroke="white" strokeOpacity="0.95" strokeWidth="1.2" fill="rgba(255,255,255,0.03)" />
-              </svg>
-            </div>
+            <img 
+              src="/images/parseai-logo.png" 
+              alt="PARSeAI Logo" 
+              className="w-10 h-10 object-contain"
+            />
             <span className="text-white font-semibold text-lg tracking-tight">PARSeAI</span>
           </a>
         </div>

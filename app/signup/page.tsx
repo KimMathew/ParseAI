@@ -30,21 +30,11 @@ export default function Signup() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex justify-center mb-6">
-          <div className="w-12 h-12 rounded-full bg-linear-to-br from-[#6366F1] to-[#8B5CF6] flex items-center justify-center">
-            <svg
-              className="w-6 h-6 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 6.253v13m0-13C6.5 6.253 2 10.753 2 16.5S6.5 26.747 12 26.747s10-4.5 10-10.247S17.5 6.253 12 6.253z"
-              />
-            </svg>
-          </div>
+          <img 
+            src="/images/parseai-logo.png" 
+            alt="PARSeAI Logo" 
+            className="w-16 h-16 object-contain"
+          />
         </div>
 
         {/* Header */}
