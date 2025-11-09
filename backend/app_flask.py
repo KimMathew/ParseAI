@@ -1,6 +1,18 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
+from dotenv import load_dotenv
+import pathlib
+env_local_path = pathlib.Path(__file__).parent.parent / '.env.local'
+env_path = pathlib.Path(__file__).parent.parent / '.env'
+if env_local_path.exists():
+    load_dotenv(dotenv_path=env_local_path)
+    print(f"[DEBUG] Loaded .env.local from: {env_local_path}")
+else:
+    load_dotenv(dotenv_path=env_path)
+    print(f"[DEBUG] Loaded .env from: {env_path}")
+print(f"[DEBUG] SUPABASE_URL: {os.environ.get('NEXT_PUBLIC_SUPABASE_URL')}")
+print(f"[DEBUG] SUPABASE_SERVICE_KEY: {os.environ.get('NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY')}")
 from langchain_ollama import ChatOllama
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
@@ -13,7 +25,7 @@ from keybert import KeyBERT
 import torch
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, supports_credentials=True)
 
 model_name = "BAAI/bge-base-en-v1.5"
 model_kwargs = {"device": "cpu"}
@@ -136,6 +148,202 @@ def summarize():
         return jsonify(result)
     else:
         return jsonify({'error': 'No file or text provided.'}), 400
+
+
+# --- Q&A Endpoint for Chat ---
+@app.route('/ask', methods=['POST'])
+def ask():
+    data = request.get_json()
+    document_id = data.get('document_id')
+    question = data.get('question')
+    if not document_id or not question:
+        return jsonify({'error': 'Missing document_id or question'}), 400
+
+    # --- Supabase client setup ---
+    import supabase
+    from supabase import create_client
+    SUPABASE_URL = os.environ.get('NEXT_PUBLIC_SUPABASE_URL')
+    SUPABASE_KEY = os.environ.get('NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY') or os.environ.get('SUPABASE_KEY')
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        return jsonify({'error': 'Supabase credentials not set in environment'}), 500
+    supa = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+    # --- Fetch document record ---
+    doc_resp = supa.table('documents').select('*').eq('id', document_id).single().execute()
+    doc = doc_resp.data if hasattr(doc_resp, 'data') else doc_resp.get('data')
+    if not doc:
+        return jsonify({'error': 'Document not found in database'}), 404
+
+    file_url = doc.get('file_url')
+    file_type = doc.get('file_type')
+    original_text = doc.get('original_text')
+
+    import tempfile
+    temp_path = None
+    full_text = None
+    try:
+        if file_url and file_type in ('pdf', 'docx'):
+            # Download file from Supabase Storage
+            # file_url is like 'user_id/timestamp_filename.pdf'
+            bucket = 'documents'
+            file_path = file_url
+            file_data = supa.storage.from_(bucket).download(file_path)
+            # Save to temp file
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf' if file_type=='pdf' else '.docx') as temp:
+                temp.write(file_data)
+                temp_path = temp.name
+            # Extract clustered/filtered text
+            filter = EmbeddingsClusteringFilter(embeddings=embeddings, num_clusters=10)
+            texts = extract(temp_path)
+            result = filter.transform_documents(documents=texts)
+            full_text = "\n".join([doc.page_content for doc in result])
+        elif original_text:
+            # Use original_text (for pasted text)
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.txt', mode='w', encoding='utf-8') as temp:
+                temp.write(original_text)
+                temp_path = temp.name
+            filter = EmbeddingsClusteringFilter(embeddings=embeddings, num_clusters=10)
+            texts = extract(temp_path)
+            result = filter.transform_documents(documents=texts)
+            full_text = "\n".join([doc.page_content for doc in result])
+        else:
+            return jsonify({'error': 'No file or text found for this document.'}), 404
+    except Exception as e:
+        return jsonify({'error': f'Failed to extract document text: {str(e)}'}), 500
+    finally:
+        if temp_path and os.path.exists(temp_path):
+            try:
+                os.remove(temp_path)
+            except Exception:
+                pass
+
+    # --- Compose prompt for Ollama ---
+    prompt = (
+        f"This is the text of a research paper:\n{full_text}\n"
+        f"Answer the following question based ONLY on the above paper.\n"
+        f"Question: {question}\n"
+        f"Answer in a clear, concise way for a non-technical reader."
+    )
+    try:
+        response = llm.invoke(prompt)
+        if hasattr(response, 'content'):
+            response = response.content
+        answer = response.strip()
+    except Exception as e:
+        return jsonify({'error': f'LLM error: {str(e)}'}), 500
+
+    return jsonify({'answer': answer})
+
+# --- Per-document Chat Endpoints ---
+from datetime import datetime
+
+# POST /chat: Ask a question, get answer, save both
+@app.route('/chat', methods=['POST', 'OPTIONS'])
+def chat():
+    if request.method == 'OPTIONS':
+        # CORS preflight
+        return ('', 204)
+    data = request.get_json()
+    user_id = data.get('user_id')
+    document_id = data.get('document_id')
+    question = data.get('question')
+    if not user_id or not document_id or not question:
+        return jsonify({'error': 'Missing user_id, document_id, or question'}), 400
+
+    # Use the same logic as /ask to get the answer
+    # --- Supabase client setup ---
+    import supabase
+    from supabase import create_client
+    SUPABASE_URL = os.environ.get('NEXT_PUBLIC_SUPABASE_URL')
+    SUPABASE_KEY = os.environ.get('NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY') or os.environ.get('SUPABASE_KEY')
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        return jsonify({'error': 'Supabase credentials not set in environment'}), 500
+    supa = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+    # --- Fetch document record ---
+    doc_resp = supa.table('documents').select('*').eq('id', document_id).single().execute()
+    doc = doc_resp.data if hasattr(doc_resp, 'data') else doc_resp.get('data')
+    if not doc:
+        return jsonify({'error': 'Document not found in database'}), 404
+
+    file_url = doc.get('file_url')
+    file_type = doc.get('file_type')
+    original_text = doc.get('original_text')
+
+    import tempfile
+    temp_path = None
+    full_text = None
+    try:
+        if file_url and file_type in ('pdf', 'docx'):
+            bucket = 'documents'
+            file_path = file_url
+            file_data = supa.storage.from_(bucket).download(file_path)
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf' if file_type=='pdf' else '.docx') as temp:
+                temp.write(file_data)
+                temp_path = temp.name
+            filter = EmbeddingsClusteringFilter(embeddings=embeddings, num_clusters=10)
+            texts = extract(temp_path)
+            result = filter.transform_documents(documents=texts)
+            full_text = "\n".join([doc.page_content for doc in result])
+        elif original_text:
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.txt', mode='w', encoding='utf-8') as temp:
+                temp.write(original_text)
+                temp_path = temp.name
+            filter = EmbeddingsClusteringFilter(embeddings=embeddings, num_clusters=10)
+            texts = extract(temp_path)
+            result = filter.transform_documents(documents=texts)
+            full_text = "\n".join([doc.page_content for doc in result])
+        else:
+            return jsonify({'error': 'No file or text found for this document.'}), 404
+    except Exception as e:
+        return jsonify({'error': f'Failed to extract document text: {str(e)}'}), 500
+    finally:
+        if temp_path and os.path.exists(temp_path):
+            try:
+                os.remove(temp_path)
+            except Exception:
+                pass
+
+    # --- Compose prompt for Ollama ---
+    prompt = (
+        f"This is the text of a research paper:\n{full_text}\n"
+        f"Answer the following question based ONLY on the above paper.\n"
+        f"Question: {question}\n"
+        f"Answer in a clear, concise way for a non-technical reader."
+    )
+    try:
+        response = llm.invoke(prompt)
+        if hasattr(response, 'content'):
+            response = response.content
+        answer = response.strip()
+    except Exception as e:
+        return jsonify({'error': f'LLM error: {str(e)}'}), 500
+
+    # --- Save chat to Supabase ---
+    chat_data = {
+        'user_id': user_id,
+        'document_id': document_id,
+        'question': question,
+        'answer': answer,
+        'created_at': datetime.utcnow().isoformat() + 'Z',
+    }
+    supa.table('chats').insert(chat_data).execute()
+
+    return jsonify({'answer': answer})
+
+# GET /chat/<document_id>: Get all chat messages for a document
+@app.route('/chat/<document_id>', methods=['GET'])
+def get_chat(document_id):
+    import supabase
+    from supabase import create_client
+    SUPABASE_URL = os.environ.get('NEXT_PUBLIC_SUPABASE_URL')
+    SUPABASE_KEY = os.environ.get('NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY') or os.environ.get('SUPABASE_KEY')
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        return jsonify({'error': 'Supabase credentials not set in environment'}), 500
+    supa = create_client(SUPABASE_URL, SUPABASE_KEY)
+    resp = supa.table('chats').select('*').eq('document_id', document_id).order('created_at', desc=False).execute()
+    chats = resp.data if hasattr(resp, 'data') else resp.get('data')
+    return jsonify({'chats': chats or []})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)

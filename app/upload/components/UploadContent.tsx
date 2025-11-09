@@ -21,6 +21,9 @@ type UploadContentProps = {
   onTextChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   summaryResult: Record<string, string> | null;
   error: string | null;
+  // New for chat
+  documentId?: string | number | null;
+  userId?: string | null;
 };
 
 export default function UploadContent({
@@ -39,6 +42,8 @@ export default function UploadContent({
   onTextChange,
   summaryResult,
   error,
+  documentId,
+  userId,
 }: UploadContentProps) {
   return (
     <div className="h-full flex items-center justify-center px-4 sm:px-6 py-6 sm:py-8">
@@ -245,6 +250,8 @@ export default function UploadContent({
             isDarkMode={isDarkMode}
             theme={theme}
             onClose={() => onShowChat(false)}
+            documentId={documentId ?? null}
+            userId={userId ?? null}
           />
         )}
       </div>

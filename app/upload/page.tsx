@@ -19,6 +19,7 @@ export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [text, setText] = useState<string>("");
   const [summaryResult, setSummaryResult] = useState<any>(null);
+  const [currentDocumentId, setCurrentDocumentId] = useState<string | number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // User state
@@ -160,14 +161,14 @@ export default function UploadPage() {
         throw new Error(`Server error ${res.status}: ${textBody}`);
       }
       const data = await res.json();
-      setSummaryResult(data);
+  setSummaryResult(data);
       console.log('Abstract to be saved:', data.Abstract);
       console.log('Introduction to be saved:', data.Introduction);
       console.log('Methodology to be saved:', data.Methodology);
       console.log('Results to be saved:', data.Results);
       console.log('Conclusion to be saved:', data.Conclusion);
       console.log('Keywords to be saved:', data.Keywords);
-      setStage('results');
+  setStage('results');
       // 3. Save document to Supabase
       const { data: docData, error: docError } = await createDocument({
         user_id: user.id,
@@ -200,7 +201,8 @@ export default function UploadPage() {
       }
       // 5. Refetch upload history from Supabase to ensure UI is in sync
       await fetchHistory();
-      setSelectedHistory(document.id);
+  setSelectedHistory(document.id);
+  setCurrentDocumentId(document.id);
       // After setSelectedHistory(document.id);
     } catch (err: any) {
       setError(err?.message ?? "An unexpected error occurred.");
@@ -227,6 +229,7 @@ export default function UploadPage() {
   const handleHistoryClick = (item: any) => {
     setSelectedHistory(item.id);
     setSummaryResult(item.summaryResult);
+    setCurrentDocumentId(item.id);
     setStage('results');
     setShowChat(false);
     // Close sidebar on mobile after selection
@@ -326,6 +329,8 @@ export default function UploadPage() {
             onTextChange={handleTextChange}
             summaryResult={summaryResult}
             error={error}
+            documentId={currentDocumentId}
+            userId={user?.id ?? null}
           />
         </div>
       </div>
