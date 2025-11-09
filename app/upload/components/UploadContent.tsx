@@ -86,7 +86,11 @@ export default function UploadContent({
             <div className="p-4 sm:p-6 md:p-8">
 
               {uploadMethod === 'file' ? (
-                <div className={`border-2 border-dashed ${theme.uploadBorder} rounded-xl p-6 sm:p-8 md:p-12 text-center ${theme.uploadHoverBorder} ${theme.uploadHoverBg} transition-all cursor-pointer`}>
+                <label
+                  className={`border-2 border-dashed ${theme.uploadBorder} rounded-xl p-6 sm:p-8 md:p-12 text-center ${theme.uploadHoverBorder} ${theme.uploadHoverBg} transition-all cursor-pointer block`}
+                  htmlFor="file-upload-input"
+                  style={{ position: 'relative' }}
+                >
                   <Upload className={`w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 mx-auto ${theme.textMuted} mb-3 sm:mb-4`} />
                   <p className={`text-sm sm:text-base md:text-lg font-medium ${theme.text} mb-2`}>
                     Drop your research paper here
@@ -98,13 +102,14 @@ export default function UploadContent({
                     Supports PDF and DOCX (Max 25MB)
                   </p>
                   <input
+                    id="file-upload-input"
                     type="file"
-                    accept="application/pdf"
+                    accept="application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                     onChange={onFileChange}
-                    className="mt-4 block mx-auto"
+                    style={{ display: 'none' }}
                   />
                   {file && <div className="text-xs mt-2 text-center">Selected: {file.name}</div>}
-                </div>
+                </label>
               ) : (
                 <div>
                   <textarea
@@ -114,7 +119,7 @@ export default function UploadContent({
                     onChange={onTextChange}
                   />
                   <p className={`text-xs ${theme.textMuted} mt-2`}>
-                    Paste the full paper or abstract for best results
+                    Paste the full paper here
                   </p>
                 </div>
               )}

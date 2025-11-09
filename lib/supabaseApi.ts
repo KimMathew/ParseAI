@@ -15,7 +15,7 @@ export async function getUserByEmail(email: string) {
 
 // DOCUMENT TABLE
 export async function createDocument({ user_id, title, file_url, file_type, original_text }: { user_id: string, title: string, file_url: string, file_type: string, original_text?: string }) {
-  return await supabase.from('documents').insert([{ user_id, title, file_url, file_type, original_text }]);
+  return await supabase.from('documents').insert([{ user_id, title, file_url, file_type, original_text }]).select().single();;
 }
 
 export async function getDocumentsByUser(user_id: string) {
@@ -27,8 +27,8 @@ export async function getDocumentById(id: string) {
 }
 
 // SUMMARIES TABLE
-export async function createSummary({ document_id, abstract_summary, introduction_summary, methodology_summary, conclusion_summary, keywords }: { document_id: string, abstract_summary: string, introduction_summary: string, methodology_summary: string, conclusion_summary: string, keywords: any }) {
-  return await supabase.from('summaries').insert([{ document_id, abstract_summary, introduction_summary, methodology_summary, conclusion_summary, keywords }]);
+export async function createSummary({ document_id, abstract_summary, introduction_summary, methodology_summary, results_summary, conclusion_summary, keywords }: { document_id: string, abstract_summary: string, introduction_summary: string, methodology_summary: string, results_summary: string, conclusion_summary: string, keywords: string }) {
+  return await supabase.from('summaries').insert([{ document_id, abstract_summary, introduction_summary, methodology_summary, results_summary, conclusion_summary, keywords }]);
 }
 
 export async function getSummaryByDocumentId(document_id: string) {
@@ -37,5 +37,10 @@ export async function getSummaryByDocumentId(document_id: string) {
 
 // FILE UPLOAD TO SUPABASE STORAGE
 export async function uploadFileToStorage(file: File, path: string) {
-  return await supabase.storage.from('documents').upload(path, file);
+  const result = await supabase.storage.from('documents').upload(path, file);
+  if (result.error) {
+    // eslint-disable-next-line no-console
+    console.error('Supabase upload error:', result.error, 'path:', path, 'file:', file);
+  }
+  return result;
 }
