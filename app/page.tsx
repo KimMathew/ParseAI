@@ -275,15 +275,22 @@ export default function ResearchSummarizer() {
       {/* Summaries output ...existing code... */}
       <hr className="my-6" />
       <div className="space-y-4">
+        {/* Show Keywords card if present */}
+        {summaries && summaries["Keywords"] && (
+          <div className="p-4 border rounded bg-yellow-50">
+            <h2 className="font-semibold text-green-700">Keywords</h2>
+            <p className="mt-2 text-black whitespace-pre-line">{summaries["Keywords"]}</p>
+          </div>
+        )}
         {keySections.map((section) => (
           <div key={section} className="p-4 border rounded">
             <h2 className="font-semibold text-blue-700">{section}</h2>
             <p className="mt-2 text-white-800 whitespace-pre-line">{getSectionSummary(section)}</p>
           </div>
         ))}
-        {/* Show any other sections returned by backend that aren't in keySections */}
+        {/* Show any other sections returned by backend that aren't in keySections or Keywords */}
         {summaries && Object.keys(summaries)
-          .filter((section) => !keySections.includes(section))
+          .filter((section) => !keySections.includes(section) && section !== "Keywords")
           .map((section) => (
             <div key={section} className="p-4 border rounded">
               <h2 className="font-semibold text-blue-700">{section}</h2>

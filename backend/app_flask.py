@@ -8,6 +8,10 @@ from langchain_community.document_transformers import EmbeddingsClusteringFilter
 from langchain_huggingface import HuggingFaceEmbeddings
 import re
 
+# KeyBERT imports
+from keybert import KeyBERT
+import torch
+
 app = Flask(__name__)
 CORS(app)
 
@@ -48,7 +52,7 @@ def summarize_document_with_kmeans_clustering(file, llm, embeddings):
             "Abstract, Introduction, Methodology, Results, Conclusion. "
             "If a section is not present, do NOT mention it at all. Don't include any other sections. "
             "For each section found, output the section name as a markdown heading with double asterisks (e.g., **Section**) followed by its summary as a single paragraph. "
-            "Do NOT use bullet points, numbered lists, or any introductory comments. "
+            "Do NOT use bullet points, numbered lists, or any introductory comments. Use simple words to explain the content to a non-IT person. "
             
         )
         print("[DEBUG] LLM Prompt:\n", prompt[:1000], "..." if len(prompt) > 1000 else "")
@@ -75,6 +79,26 @@ def summarize_document_with_kmeans_clustering(file, llm, embeddings):
                         paragraph = re.split(r"references:?\s*", paragraph, flags=re.IGNORECASE)[0].strip()
                     summaries[section] = paragraph.strip()
             print("[DEBUG] Parsed JSON from markdown headings (post-processed):\n", summaries)
+            # --- Keyword Extraction ---
+            # 1. Try to extract stated keywords from the text
+            keyword_pattern = re.compile(r"keywords?\s*[:\-]\s*(.+?)(?:\n|$)", re.IGNORECASE)
+            keyword_match = keyword_pattern.search(full_text)
+            if keyword_match:
+                # Use the stated keywords (split by comma or semicolon)
+                stated_keywords = keyword_match.group(1)
+                keywords = [k.strip() for k in re.split(r",|;", stated_keywords) if k.strip()]
+                summaries["Keywords"] = ", ".join(keywords)
+            else:
+                # 2. Use KeyBERT to extract keywords from the text
+                try:
+                    # Use only the first 2000 characters for speed
+                    text_for_kw = full_text[:2000] if len(full_text) > 2000 else full_text
+                    kw_model = KeyBERT()
+                    keybert_keywords = kw_model.extract_keywords(text_for_kw, keyphrase_ngram_range=(1, 2), stop_words='english', top_n=8)
+                    keywords = [kw for kw, score in keybert_keywords]
+                    summaries["Keywords"] = ", ".join(keywords)
+                except Exception as e:
+                    summaries["Keywords"] = f"Error extracting keywords: {str(e)}"
         except Exception as e:
             print("[ERROR] LLM invocation failed:\n", e)
             summaries = {"error": f"Error extracting sections: {str(e)}"}
