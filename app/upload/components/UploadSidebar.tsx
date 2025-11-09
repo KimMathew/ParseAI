@@ -37,7 +37,27 @@ export default function UploadSidebar({
   onNewUpload,
 }: UploadSidebarProps) {
   return (
-    <div className={`${sidebarOpen ? 'w-80' : 'w-0'} transition-all duration-300 ${theme.sidebarBg} border-r ${theme.sidebarBorder} flex flex-col overflow-hidden fixed left-0 top-0 h-screen z-40`}>
+    <>
+      {/* Backdrop Overlay - Only visible on mobile when sidebar is open */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity duration-300"
+          onClick={onNewUpload}
+          aria-hidden="true"
+        />
+      )}
+      
+      {/* Sidebar */}
+      <div className={`
+        ${theme.sidebarBg} border-r ${theme.sidebarBorder} 
+        flex flex-col overflow-hidden fixed left-0 top-0 h-screen
+        transition-all duration-300 ease-in-out
+        w-80 max-w-[85vw]
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        lg:translate-x-0
+        ${sidebarOpen ? 'lg:w-80' : 'lg:w-0'}
+        z-60 lg:z-40
+      `}>
       {/* User Profile Section */}
       <div className={`p-4 border-b ${theme.sidebarBorder} bg-linear-to-r from-[#6366F1] to-[#8B5CF6] shrink-0`}>
         <div className="flex items-center gap-3 mb-4">
@@ -142,5 +162,6 @@ export default function UploadSidebar({
         </button>
       </div>
     </div>
+    </>
   );
 }
