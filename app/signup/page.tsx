@@ -1,21 +1,61 @@
 "use client";
 
+
 import { useState } from "react";
 import Link from "next/link";
 import InputField from "@/components/InputField";
+import { supabase } from "@/lib/supabaseClient";
+import { createUser } from "@/lib/supabaseApi";
+import { v4 as uuidv4 } from 'uuid';
 
 export default function Signup() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
     setIsLoading(true);
-    // TODO: Implement authentication logic
-    console.log("Sign up with email:", email, password);
-    setIsLoading(false);
+    try {
+      // Supabase Auth sign up
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      if (signUpError) {
+        setError(signUpError.message);
+        setIsLoading(false);
+        return;
+      }
+      // Only proceed if user id is available
+      const userId = data.user?.id;
+      if (!userId) {
+        setError("Failed to get user id from Supabase Auth.");
+        setIsLoading(false);
+        return;
+      }
+      const { error: userError } = await createUser({ id: userId, name, email });
+      if (userError) {
+        setError(userError.message || "Failed to create user profile.");
+        setIsLoading(false);
+        return;
+      }
+      // Optionally redirect or show success
+      // window.location.href = "/signin";
+      setIsLoading(false);
+      alert("Account created! Please check your email to verify.");
+    } catch (err: any) {
+      setError(err.message || "An error occurred.");
+      setIsLoading(false);
+    }
   };
 
   const handleGoogleSignUp = async () => {
@@ -45,6 +85,21 @@ export default function Signup() {
 
         {/* Signup Form */}
         <form onSubmit={handleSignUp} className="space-y-4 mb-6">
+          {error && (
+            <div className="text-red-500 text-sm text-center">{error}</div>
+          )}
+          
+          {/* Name Input */}
+          <InputField
+            id="name"
+            label="Name"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Enter your name"
+            required
+          />
+
           {/* Email Input */}
           <InputField
             id="email"
@@ -55,7 +110,7 @@ export default function Signup() {
             placeholder="Enter your email"
             required
           />
-
+          
           {/* Password Input */}
           <InputField
             id="password"

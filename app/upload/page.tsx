@@ -5,6 +5,8 @@ import { ChevronLeft, Menu, RotateCcw, Moon, Sun, MessageSquare } from 'lucide-r
 import { getTheme } from '@/lib/theme';
 import UploadSidebar from './components/UploadSidebar';
 import UploadContent from './components/UploadContent';
+import { supabase } from '@/lib/supabaseClient';
+import { getDocumentsByUser, getSummaryByDocumentId, createDocument, createSummary, uploadFileToStorage } from '@/lib/supabaseApi';
 
 export default function UploadPage() {
   const [stage, setStage] = useState('upload');
@@ -14,6 +16,67 @@ export default function UploadPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false); // Changed default to false for mobile-first
   const [selectedHistory, setSelectedHistory] = useState<number | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const [file, setFile] = useState<File | null>(null);
+  const [text, setText] = useState<string>("");
+  const [summaryResult, setSummaryResult] = useState<any>(null);
+  const [currentDocumentId, setCurrentDocumentId] = useState<string | number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // User state
+  const [user, setUser] = useState<any>(null);
+  // Upload history state
+  const [uploadHistory, setUploadHistory] = useState<any[]>([]);
+
+  // Fetch user from Supabase auth
+  React.useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (data?.user) {
+        let avatarSource = data.user.user_metadata?.name || data.user.email || '';
+        let avatar = avatarSource.trim().length > 0 ? avatarSource.slice(0,2).toUpperCase() : 'U';
+        setUser({
+          id: data.user.id,
+          name: data.user.user_metadata?.name || data.user.email,
+          email: data.user.email,
+          avatar,
+        });
+      }
+    };
+    fetchUser();
+  }, []);
+
+  // Fetch upload history for this user
+  const fetchHistory = async () => {
+    if (!user?.id) return;
+    const { data: docs, error } = await getDocumentsByUser(user.id);
+    if (error) return;
+    const items = await Promise.all((docs || []).map(async (doc: any) => {
+      const { data: summary } = await getSummaryByDocumentId(doc.id);
+      // Compose summaryResult object for UploadContent
+      const summaryResult = summary ? {
+        Abstract: summary.abstract_summary,
+        Introduction: summary.introduction_summary,
+        Methodology: summary.methodology_summary,
+        Conclusion: summary.conclusion_summary,
+        Keywords: summary.keywords,
+      } : null;
+      return {
+        id: doc.id,
+        title: doc.title,
+        type: doc.file_type || 'text',
+        timestamp: new Date(doc.created_at).toLocaleString(),
+        preview: summary?.keywords || summary?.abstract_summary || 'No preview',
+        summaryResult,
+        file_url: doc.file_url,
+      };
+    }));
+    setUploadHistory(items);
+  };
+
+  React.useEffect(() => {
+    fetchHistory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   // Set sidebar open by default on desktop
   React.useEffect(() => {
@@ -33,59 +96,119 @@ export default function UploadPage() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Mock user data
-  const user = {
-    name: 'Kim Bautista',
-    email: 'kim.bautista@email.com',
-    avatar: 'KB'
+
+
+
+  // Handle file input change
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0] ?? null;
+    setFile(f);
+    if (f) setText("");
   };
 
-  // Mock history data
-  const uploadHistory = [
-    {
-      id: 1,
-      title: 'Machine Learning Approaches for Climate Change',
-      type: 'pdf',
-      timestamp: '2 hours ago',
-      preview: 'Machine Learning Approaches for Climate Change Prediction'
-    },
-    {
-      id: 2,
-      title: 'Neural Networks in Medical Diagnosis',
-      type: 'pdf',
-      timestamp: '1 day ago',
-      preview: 'Neural Networks in Medical Diagnosis and Treatment'
-    },
-    {
-      id: 3,
-      title: 'Quantum Computing Applications...',
-      type: 'text',
-      timestamp: '2 days ago',
-      preview: 'This study explores the practical applications of quantum computing...'
-    },
-    {
-      id: 4,
-      title: 'Renewable Energy Systems',
-      type: 'pdf',
-      timestamp: '3 days ago',
-      preview: 'Renewable Energy Systems: A Comprehensive Review'
-    },
-    {
-      id: 5,
-      title: 'Blockchain Technology in Healthcare',
-      type: 'pdf',
-      timestamp: '1 week ago',
-      preview: 'Blockchain Technology Applications in Healthcare Systems'
-    }
-  ];
+  // Handle text input change
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setText(e.target.value);
+    if (e.target.value) setFile(null);
+  };
 
-  const handleSummarize = () => {
+  // Backend integration for summarization
+  const handleSummarize = async () => {
+    setError(null);
+    setSummaryResult(null);
+    if (!file && !text.trim()) {
+      setError("Please provide paper text or upload a PDF file.");
+      return;
+    }
+    if (!user?.id) {
+      setError("User not authenticated.");
+      return;
+    }
     setIsProcessing(true);
-    setTimeout(() => {
+    try {
+      let res: Response;
+      let file_url = null;
+      let file_type = null;
+      let docTitle = file ? file.name : (text.slice(0, 40) + (text.length > 40 ? '...' : ''));
+      // 1. Upload file to Supabase Storage if file
+      if (file) {
+        const path = `${user.id}/${Date.now()}_${file.name}`;
+        const { data: uploadData, error: uploadError } = await uploadFileToStorage(file, path);
+        if (uploadError) throw new Error('File upload failed');
+        file_url = uploadData?.path || null;
+        file_type = file.type.includes('pdf') ? 'pdf' : 'docx';
+      } else {
+        file_type = 'text';
+      }
+      // 2. Summarize
+      if (file) {
+        const fd = new FormData();
+        fd.append("file", file);
+        res = await fetch("http://127.0.0.1:8000/summarize", {
+          method: "POST",
+          body: fd,
+          cache: "no-store",
+        });
+      } else {
+        res = await fetch("http://127.0.0.1:8000/summarize", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
+        });
+      }
+      if (!res.ok) {
+        const textBody = await res.text();
+        throw new Error(`Server error ${res.status}: ${textBody}`);
+      }
+      const data = await res.json();
+  setSummaryResult(data);
+      console.log('Abstract to be saved:', data.Abstract);
+      console.log('Introduction to be saved:', data.Introduction);
+      console.log('Methodology to be saved:', data.Methodology);
+      console.log('Results to be saved:', data.Results);
+      console.log('Conclusion to be saved:', data.Conclusion);
+      console.log('Keywords to be saved:', data.Keywords);
+  setStage('results');
+      // 3. Save document to Supabase
+      const { data: docData, error: docError } = await createDocument({
+        user_id: user.id,
+        title: docTitle,
+        file_url: file_url || '',
+        file_type,
+        original_text: file ? undefined : text,
+      });
+
+      console.log('docData:', docData, 'docError:', docError);
+  if (docError || !docData) throw new Error('Failed to save document');
+      const document: any = Array.isArray(docData) ? docData[0] : docData;
+      console.log('Document ID to be saved:', document.id);
+      if (!document) throw new Error('Document not returned from DB');
+      // 4. Save summary to Supabase
+      const { error: summaryError } = await createSummary({
+        document_id: document.id,
+        abstract_summary: data.Abstract || '',
+        introduction_summary: data.Introduction || '',
+        methodology_summary: data.Methodology || '',
+        results_summary: data.Results || '',
+        conclusion_summary: data.Conclusion || '',
+        keywords: data.Keywords || '',
+      }) || {};
+      if (summaryError) {
+        // eslint-disable-next-line no-console
+        console.error('Supabase summary insert error:', summaryError);
+        setError('Failed to save summary: ' + summaryError.message);
+        return;
+      }
+      // 5. Refetch upload history from Supabase to ensure UI is in sync
+      await fetchHistory();
+  setSelectedHistory(document.id);
+  setCurrentDocumentId(document.id);
+      // After setSelectedHistory(document.id);
+    } catch (err: any) {
+      setError(err?.message ?? "An unexpected error occurred.");
+    } finally {
       setIsProcessing(false);
-      setStage('results');
-      setSelectedHistory(1);
-    }, 2000);
+    }
   };
 
   const handleNewUpload = () => {
@@ -93,14 +216,20 @@ export default function UploadPage() {
     setUploadMethod('file');
     setShowChat(false);
     setSelectedHistory(null);
+    setFile(null);
+    setText("");
+    setSummaryResult(null);
+    setError(null);
     // Close sidebar on mobile when starting new upload
     if (window.innerWidth < 1024) {
       setSidebarOpen(false);
     }
   };
 
-  const handleHistoryClick = (item: { id: number; title: string; type: string; timestamp: string; preview: string }) => {
+  const handleHistoryClick = (item: any) => {
     setSelectedHistory(item.id);
+    setSummaryResult(item.summaryResult);
+    setCurrentDocumentId(item.id);
     setStage('results');
     setShowChat(false);
     // Close sidebar on mobile after selection
@@ -120,7 +249,7 @@ export default function UploadPage() {
         selectedHistory={selectedHistory}
         isDarkMode={isDarkMode}
         theme={theme}
-        user={user}
+        user={user ?? { name: '', email: '', avatar: 'U' }}
         uploadHistory={uploadHistory}
         onHistoryClick={handleHistoryClick}
         onNewUpload={handleNewUpload}
@@ -193,6 +322,15 @@ export default function UploadPage() {
             onUploadMethodChange={setUploadMethod}
             onSummarize={handleSummarize}
             onShowChat={setShowChat}
+            // New props for backend integration
+            file={file}
+            text={text}
+            onFileChange={handleFileChange}
+            onTextChange={handleTextChange}
+            summaryResult={summaryResult}
+            error={error}
+            documentId={currentDocumentId}
+            userId={user?.id ?? null}
           />
         </div>
       </div>
