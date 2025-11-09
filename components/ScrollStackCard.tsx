@@ -59,7 +59,7 @@ export default function ScrollStackCard({
         {/* Glow background - static blur for better performance */}
         <div
           aria-hidden
-          className="scroll-stack-glow absolute inset-1 rounded-2xl blur-xl opacity-75 transition-all duration-300 group-hover:opacity-100"
+          className="scroll-stack-glow absolute inset-1 rounded-2xl blur-lg opacity-25 transition-all duration-300 group-hover:opacity-100"
           style={{ backgroundColor: glowColor }}
         />
 

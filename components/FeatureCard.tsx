@@ -23,7 +23,7 @@ export default function FeatureCard({
     <div className={outerClass}>
       <div
         aria-hidden
-        className="absolute inset-1 rounded-xl blur-xl opacity-80 transition-opacity duration-300 group-hover:opacity-95"
+        className="absolute inset-1 rounded-xl blur-lg opacity-80 transition-opacity duration-300 group-hover:opacity-95"
         style={{ backgroundColor: glowColor }}
       />
 
