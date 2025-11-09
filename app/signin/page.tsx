@@ -1,20 +1,40 @@
 "use client";
 
+
 import { useState } from "react";
 import Link from "next/link";
 import InputField from "@/components/InputField";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function Signin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+
+  const [error, setError] = useState<string | null>(null);
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     setIsLoading(true);
-    // TODO: Implement authentication logic
-    console.log("Sign in with email:", email, password);
-    setIsLoading(false);
+    try {
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (signInError) {
+        setError(signInError.message);
+        setIsLoading(false);
+        return;
+      }
+      // Optionally redirect after sign in
+      window.location.href = "/upload";
+      setIsLoading(false);
+    } catch (err: any) {
+      setError(err.message || "An error occurred.");
+      setIsLoading(false);
+    }
   };
 
   const handleGoogleSignIn = async () => {
@@ -44,6 +64,9 @@ export default function Signin() {
 
         {/* Login Form */}
         <form onSubmit={handleSignIn} className="space-y-4 mb-6">
+          {error && (
+            <div className="text-red-500 text-sm text-center">{error}</div>
+          )}
           {/* Email Input */}
           <InputField
             id="email"

@@ -14,6 +14,12 @@ export default function UploadPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false); // Changed default to false for mobile-first
   const [selectedHistory, setSelectedHistory] = useState<number | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(true);
+  // New: file and text state for upload
+  const [file, setFile] = useState<File | null>(null);
+  const [text, setText] = useState<string>("");
+  // New: summary result from backend
+  const [summaryResult, setSummaryResult] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Set sidebar open by default on desktop
   React.useEffect(() => {
@@ -39,8 +45,7 @@ export default function UploadPage() {
     email: 'kim.bautista@email.com',
     avatar: 'KB'
   };
-
-  // Mock history data
+  // Mock history data (keep for now)
   const uploadHistory = [
     {
       id: 1,
@@ -79,13 +84,59 @@ export default function UploadPage() {
     }
   ];
 
-  const handleSummarize = () => {
+
+  // Handle file input change
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0] ?? null;
+    setFile(f);
+    if (f) setText("");
+  };
+
+  // Handle text input change
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setText(e.target.value);
+    if (e.target.value) setFile(null);
+  };
+
+  // Backend integration for summarization
+  const handleSummarize = async () => {
+    setError(null);
+    setSummaryResult(null);
+    if (!file && !text.trim()) {
+      setError("Please provide paper text or upload a PDF file.");
+      return;
+    }
     setIsProcessing(true);
-    setTimeout(() => {
-      setIsProcessing(false);
+    try {
+      let res: Response;
+      if (file) {
+        const fd = new FormData();
+        fd.append("file", file);
+        res = await fetch("http://127.0.0.1:8000/summarize", {
+          method: "POST",
+          body: fd,
+          cache: "no-store",
+        });
+      } else {
+        res = await fetch("http://127.0.0.1:8000/summarize", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
+        });
+      }
+      if (!res.ok) {
+        const textBody = await res.text();
+        throw new Error(`Server error ${res.status}: ${textBody}`);
+      }
+      const data = await res.json();
+      setSummaryResult(data);
       setStage('results');
-      setSelectedHistory(1);
-    }, 2000);
+      setSelectedHistory(null); // Not from history
+    } catch (err: any) {
+      setError(err?.message ?? "An unexpected error occurred.");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleNewUpload = () => {
@@ -93,6 +144,10 @@ export default function UploadPage() {
     setUploadMethod('file');
     setShowChat(false);
     setSelectedHistory(null);
+    setFile(null);
+    setText("");
+    setSummaryResult(null);
+    setError(null);
     // Close sidebar on mobile when starting new upload
     if (window.innerWidth < 1024) {
       setSidebarOpen(false);
@@ -193,6 +248,13 @@ export default function UploadPage() {
             onUploadMethodChange={setUploadMethod}
             onSummarize={handleSummarize}
             onShowChat={setShowChat}
+            // New props for backend integration
+            file={file}
+            text={text}
+            onFileChange={handleFileChange}
+            onTextChange={handleTextChange}
+            summaryResult={summaryResult}
+            error={error}
           />
         </div>
       </div>
