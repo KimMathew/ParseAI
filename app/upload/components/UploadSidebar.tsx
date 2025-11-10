@@ -71,13 +71,12 @@ export default function UploadSidebar({
           />
           {/* Menu - appears to the right of sidebar */}
           <div 
-            className={`fixed bottom-4 left-24 ${theme.cardBg} border ${theme.cardBorder} rounded-xl shadow-2xl z-80 backdrop-blur-xl min-w-[200px]`}
-            style={{ position: 'fixed' }}
+            className={`fixed bottom-4 left-24 ${theme.cardBg} border ${theme.cardBorder} rounded-xl shadow-2xl z-80 backdrop-blur-xl w-64 overflow-hidden`}
           >
             {/* User Info */}
-            <div className="p-4 border-b border-white/10">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-linear-to-r from-[#6366F1] to-[#8B5CF6] rounded-full flex items-center justify-center text-white font-bold text-sm border-2 border-white/20">
+            <div className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-linear-to-r from-[#6366F1] to-[#8B5CF6] rounded-full flex items-center justify-center text-white font-bold text-sm border-2 border-white/20 shrink-0">
                   {user.avatar}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -86,13 +85,15 @@ export default function UploadSidebar({
                 </div>
               </div>
             </div>
+            {/* Divider */}
+            <div className={`border-t ${theme.cardBorder}`}></div>
             {/* Logout Button */}
             <div className="p-2">
               <button
                 onClick={handleLogout}
-                className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-red-500/10 transition-all text-red-500`}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-red-500/10 transition-all text-red-500 cursor-pointer group`}
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-4 h-4 group-hover:scale-110 transition-transform" />
                 <span className="text-sm font-medium">Log Out</span>
               </button>
             </div>
