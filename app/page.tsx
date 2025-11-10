@@ -6,6 +6,7 @@ import Aurora from "../components/Aurora";
 import FeatureCard from "../components/FeatureCard";
 import ScrollStackCard from "../components/ScrollStackCard";
 import Footer from "../components/Footer";
+import SectionBackground from "../components/SectionBackground";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "@/lib/route";
 
@@ -66,19 +67,34 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features section (inlined) */}
-      <section className="relative py-16 scroll-mt-20" id="features">
-          <div className="max-w-5xl mx-auto px-6 flex flex-col items-center" id="features">
-          <div ref={featuresHeaderRef}>
-            <h2 className="text-center text-3xl md:text-4xl font-extrabold mb-4">
-              Powerful tools that make research simple.
-            </h2>
-            <p className="text-center text-white/60 text-lg mb-16 max-w-2xl mx-auto">
-              Three intelligent tools designed to simplify the way you read, understand, and interact with research papers.
-            </p>
-          </div>
+      {/* Features and How It Works Container with Shared Grid Background */}
+      <div className="relative">
+        {/* Vignette and Ambient Light Orbs */}
+        <SectionBackground />
 
-          <div ref={featureCardsRef} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Shared Grid Pattern Background */}
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)',
+            backgroundSize: '50px 50px',
+            maskImage: 'linear-gradient(to bottom, transparent 0%, black 10%, black 100%)'
+          }}
+        ></div>
+
+        {/* Features section */}
+        <section className="relative py-16 scroll-mt-20" id="features">
+          <div className="max-w-5xl mx-auto px-6 flex flex-col items-center relative z-10">
+            <div ref={featuresHeaderRef}>
+              <h2 className="text-center text-3xl md:text-4xl font-extrabold mb-4">
+                Powerful tools that make research simple.
+              </h2>
+              <p className="text-center text-white/60 text-lg mb-16 max-w-2xl mx-auto">
+                Three intelligent tools designed to simplify the way you read, understand, and interact with research papers.
+              </p>
+            </div>
+
+            <div ref={featureCardsRef} className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Left large card (spans 2 cols on md) - uses first aurora color */}
             <FeatureCard
               outerClass="relative md:col-span-2 group h-full"
@@ -112,15 +128,15 @@ export default function Home() {
                 boxShadow: '0 36px 80px rgba(139,92,246,0.16), inset 0 1px 0 rgba(255,255,255,0.03)'
               }}
               title="Chat with your paper like a real expert"
-              description="Once logged in, start an AI-powered chat that lets you ask follow-up questions, clarify concepts, or explore related ideas — directly based on the paper’s content."
+              description="Once logged in, start an AI-powered chat that lets you ask follow-up questions, clarify concepts, or explore related ideas — directly based on the paper's content."
             />
           </div>
-        </div>
-      </section>
+          </div>
+        </section>
 
-      {/* How it Works Section */}
-      <section className="relative pt-16 pb-32 scroll-mt-20" id="how-it-works">
-        <div className="max-w-5xl mx-auto px-6 flex flex-col items-center" id="how-it-works">
+        {/* How it Works Section */}
+        <section className="relative pt-16 pb-32 scroll-mt-20" id="how-it-works">
+          <div className="max-w-5xl mx-auto px-6 flex flex-col items-center relative z-10">
           <div ref={howItWorksHeaderRef}>
             <h2 className="text-center text-3xl md:text-4xl font-extrabold mb-4">
               How It Works
@@ -168,7 +184,8 @@ export default function Home() {
             />
           </div>
         </div>
-      </section>
+        </section>
+      </div>
 
       <Footer />
     </main>
