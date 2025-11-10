@@ -145,7 +145,7 @@ export default function UploadContent({
               {uploadMethod === 'file' ? (
                 <div>
                   <label
-                    className={`border-2 border-dashed ${theme.uploadBorder} rounded-xl p-6 sm:p-8 md:p-12 text-center ${!file ? `${theme.uploadHoverBorder} ${theme.uploadHoverBg} cursor-pointer` : ''} transition-all block min-h-[280px] sm:min-h-[320px] md:min-h-[360px] flex flex-col items-center justify-center`}
+                    className={`border-2 border-dashed ${theme.uploadBorder} rounded-xl p-6 sm:p-8 md:p-12 text-center ${!file ? `${theme.uploadHoverBorder} ${theme.uploadHoverBg} cursor-pointer` : ''} transition-all block min-h-[260px] sm:min-h-[300px] md:min-h-[320px] flex flex-col items-center justify-center`}
                     htmlFor="file-upload-input"
                   >
                     {!file ? (
@@ -193,22 +193,31 @@ export default function UploadContent({
                         </p>
                         
                         {/* File Name */}
-                        <p className={`text-xs ${theme.textMuted} mb-4 truncate max-w-[300px] mx-auto`}>
+                        <p className={`text-xs ${theme.textMuted} truncate max-w-[300px] mx-auto`}>
                           {file.name}
                         </p>
 
-                        {/* Progress Bar */}
-                        <div className="mb-3">
-                          <div className="h-1.5 bg-white/10 rounded-full overflow-hidden mb-2">
-                            <div 
-                              className="h-full bg-linear-to-r from-[#6366F1] to-[#8B5CF6] rounded-full transition-all duration-100 ease-linear" 
-                              style={{ width: `${uploadProgress}%` }}
-                            ></div>
-                          </div>
-                          <p className={`text-xs ${theme.textMuted}`}>
-                            {isUploading ? `${Math.round(uploadProgress)}%` : `${(file.size / 1024).toFixed(2)} KB`}
+                        {/* File Size - Only show when upload is complete */}
+                        {uploadProgress === 100 && !isUploading && (
+                          <p className={`text-xs ${theme.textMuted} mb-4`}>
+                            {(file.size / 1024).toFixed(2)} KB
                           </p>
-                        </div>
+                        )}
+
+                        {/* Progress Bar - Only show during upload */}
+                        {isUploading && (
+                          <div className="mb-3 mt-4">
+                            <div className="h-1.5 bg-white/10 rounded-full overflow-hidden mb-2">
+                              <div 
+                                className="h-full bg-linear-to-r from-[#6366F1] to-[#8B5CF6] rounded-full transition-all duration-100 ease-linear" 
+                                style={{ width: `${uploadProgress}%` }}
+                              ></div>
+                            </div>
+                            <p className={`text-xs ${theme.textMuted}`}>
+                              {Math.round(uploadProgress)}%
+                            </p>
+                          </div>
+                        )}
 
                         {/* Clear Upload Button */}
                         {uploadProgress === 100 && !isUploading && (
@@ -241,7 +250,7 @@ export default function UploadContent({
                 <div>
                   <textarea
                     placeholder="Paste your research paper text here..."
-                    className={`w-full h-40 sm:h-48 md:h-56 p-3 sm:p-4 ${theme.inputBg} border ${theme.inputBorder} rounded-xl focus:ring-2 focus:ring-[#6366F1] focus:border-transparent resize-none text-sm sm:text-base ${theme.inputText} ${theme.inputPlaceholder}`}
+                    className={`w-full min-h-[230px] sm:min-h-[270px] md:min-h-[290px] p-3 sm:p-4 ${theme.inputBg} border ${theme.inputBorder} rounded-xl focus:ring-2 focus:ring-[#6366F1] focus:border-transparent resize-none text-sm sm:text-base ${theme.inputText} ${theme.inputPlaceholder}`}
                     value={text}
                     onChange={onTextChange}
                   />
