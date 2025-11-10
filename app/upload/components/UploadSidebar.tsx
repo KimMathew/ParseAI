@@ -1,7 +1,9 @@
 "use client";
 
 import React from 'react';
-import { Upload, FileText, LogOut, Clock, Sun, Moon } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabaseClient';
+import { Upload, FileText, LogOut, Clock, Search, Moon, Sun } from 'lucide-react';
 
 type UploadHistoryItem = {
   id: number;
@@ -38,6 +40,13 @@ export default function UploadSidebar({
   onNewUpload,
   onThemeToggle,
 }: UploadSidebarProps) {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/');
+  };
+
   return (
     <>
       {/* Backdrop Overlay - Only visible on mobile when sidebar is open */}
