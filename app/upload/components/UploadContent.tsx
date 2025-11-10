@@ -188,12 +188,12 @@ export default function UploadContent({
                         </div>
 
                         {/* Upload Status Text */}
-                        <p className={`text-sm font-semibold ${theme.text} mb-1`}>
+                        <p className={`text-sm sm:text-base font-semibold ${theme.text} mb-2 sm:mb-3`}>
                           {isUploading ? 'Uploading Document...' : 'Upload Complete'}
                         </p>
                         
                         {/* File Name */}
-                        <p className={`text-xs ${theme.textMuted} truncate max-w-[300px] mx-auto`}>
+                        <p className={`text-xs sm:text-sm ${theme.textMuted} truncate max-w-[300px] mx-auto`}>
                           {file.name}
                         </p>
 

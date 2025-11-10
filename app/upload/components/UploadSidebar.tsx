@@ -135,7 +135,7 @@ export default function UploadSidebar({
       <div className="p-4 shrink-0">
         <button
           onClick={onNewUpload}
-          className={`flex items-center justify-center bg-linear-to-r from-[#6366F1] to-[#8B5CF6] text-white hover:scale-[1.02] hover:shadow-lg hover:shadow-[#6366F1]/25 transition-all duration-200 font-semibold text-sm group cursor-pointer ${
+          className={`flex items-center justify-center bg-linear-to-r from-[#6366F1] to-[#8B5CF6] text-white hover:scale-[1.02] transition-all duration-200 font-semibold text-sm group cursor-pointer ${
             isCollapsed 
               ? 'lg:w-12 lg:h-12 lg:rounded-full lg:mx-auto w-full px-4 py-3 rounded-full' 
               : 'w-full px-4 py-3 rounded-full gap-2'
