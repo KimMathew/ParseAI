@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Upload, FileText, LogOut, Clock, Search } from 'lucide-react';
+import { Upload, FileText, LogOut, Clock, Sun, Moon } from 'lucide-react';
 
 type UploadHistoryItem = {
   id: number;
@@ -24,6 +24,7 @@ type UploadSidebarProps = {
   uploadHistory: UploadHistoryItem[];
   onHistoryClick: (item: UploadHistoryItem) => void;
   onNewUpload: () => void;
+  onThemeToggle: () => void;
 };
 
 export default function UploadSidebar({
@@ -35,6 +36,7 @@ export default function UploadSidebar({
   uploadHistory,
   onHistoryClick,
   onNewUpload,
+  onThemeToggle,
 }: UploadSidebarProps) {
   return (
     <>
@@ -58,33 +60,32 @@ export default function UploadSidebar({
         ${sidebarOpen ? 'lg:w-80' : 'lg:w-0'}
         z-60 lg:z-40
       `}>
-      {/* User Profile Section */}
-      <div className={`p-4 border-b ${theme.sidebarBorder} bg-linear-to-r from-[#6366F1] to-[#8B5CF6] shrink-0`}>
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white font-bold text-lg border border-white/20">
-            {user.avatar}
-          </div>
-          <div className="flex-1 text-white">
-            <p className="font-semibold text-sm">{user.name}</p>
-            <p className="text-xs text-white/70">{user.email}</p>
+      {/* Sidebar Header - Branded */}
+      <div className={`p-6 border-b ${theme.sidebarBorder} shrink-0 bg-linear-to-br from-[#6366F1]/10 via-[#8B5CF6]/5 to-transparent`}>
+        <div className="flex items-center gap-3">
+          <img 
+            src="/images/parseai-logo.png" 
+            alt="PARSe AI" 
+            className="w-12 h-12 object-contain rounded-full"
+          />
+          <div className="flex-1">
+            <h1 className={`text-lg font-bold ${theme.text} mb-0.5`}>PARSe AI</h1>
+            <p className={`text-xs ${theme.textMuted} leading-tight`}>
+              Paper Analysis & Research Summarizer
+            </p>
           </div>
         </div>
-        <button className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors text-sm font-medium border border-white/10">
-          <LogOut className="w-4 h-4" />
-          Log Out
-        </button>
       </div>
 
-      {/* Search Bar */}
-      <div className={`p-4 border-b ${theme.sidebarBorder} shrink-0`}>
-        <div className="relative">
-          <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${theme.textMuted}`} />
-          <input
-            type="text"
-            placeholder="Search history..."
-            className={`w-full pl-10 pr-4 py-2 ${theme.inputBg} border ${theme.inputBorder} rounded-lg focus:ring-2 focus:ring-[#6366F1] focus:border-transparent text-sm ${theme.inputText} ${theme.inputPlaceholder}`}
-          />
-        </div>
+      {/* New Upload Button */}
+      <div className={`p-4 shrink-0`}>
+        <button
+          onClick={onNewUpload}
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-linear-to-r from-[#6366F1] to-[#8B5CF6] text-white rounded-lg hover:scale-[1.02] hover:shadow-lg hover:shadow-[#6366F1]/25 transition-all duration-200 font-semibold text-sm group"
+        >
+          <Upload className="w-4 h-4 group-hover:scale-110 transition-transform" />
+          New Upload
+        </button>
       </div>
 
       {/* Upload History List */}
@@ -151,15 +152,52 @@ export default function UploadSidebar({
         </div>
       </div>
 
-      {/* New Upload Button */}
-      <div className={`p-4 border-t ${theme.sidebarBorder} shrink-0`}>
-        <button
-          onClick={onNewUpload}
-          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-linear-to-r from-[#6366F1] to-[#8B5CF6] text-white rounded-lg hover:scale-105 transition-all duration-200 font-medium"
-        >
-          <Upload className="w-4 h-4" />
-          New Upload
-        </button>
+      {/* Theme Toggle - Above Profile */}
+      <div className={`p-4 shrink-0`}>
+        <div className={`flex items-center ${isDarkMode ? 'bg-white/5' : 'bg-black/5'} rounded-lg p-1 border ${theme.cardBorder}`}>
+          <button
+            onClick={onThemeToggle}
+            className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md transition-all text-xs font-medium ${
+              !isDarkMode 
+                ? 'bg-white text-gray-900 shadow-sm' 
+                : `${theme.textMuted} hover:${theme.textSecondary}`
+            }`}
+          >
+            <Sun className="w-4 h-4" />
+            Light
+          </button>
+          <button
+            onClick={onThemeToggle}
+            className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md transition-all text-xs font-medium ${
+              isDarkMode 
+                ? `${isDarkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-900'} shadow-sm` 
+                : `${theme.textMuted} hover:${theme.textSecondary}`
+            }`}
+          >
+            <Moon className="w-4 h-4" />
+            Dark
+          </button>
+        </div>
+      </div>
+
+      {/* User Profile Section - Bottom */}
+      <div className={`p-4 border-t ${theme.sidebarBorder} shrink-0 ${theme.cardBg}`}>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-linear-to-r from-[#6366F1] to-[#8B5CF6] rounded-full flex items-center justify-center text-white font-bold text-sm border-2 border-white/20">
+            {user.avatar}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className={`font-semibold text-sm ${theme.text} truncate`}>{user.name}</p>
+            <p className={`text-xs ${theme.textMuted} truncate`}>{user.email}</p>
+          </div>
+          <button 
+            className={`p-2 ${theme.hoverBg} hover:bg-red-500/10 rounded-lg transition-all hover:text-red-500 ${theme.textSecondary}`}
+            title="Sign Out"
+            aria-label="Sign Out"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </div>
     </>

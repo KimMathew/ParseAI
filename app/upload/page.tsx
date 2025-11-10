@@ -124,17 +124,19 @@ export default function UploadPage() {
         uploadHistory={uploadHistory}
         onHistoryClick={handleHistoryClick}
         onNewUpload={handleNewUpload}
+        onThemeToggle={() => setIsDarkMode(!isDarkMode)}
       />
 
       {/* Main Content Area */}
       <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${sidebarOpen ? 'lg:ml-80' : 'lg:ml-0'}`}>
         {/* Header */}
-        <header className={`${theme.headerBg} border-b ${theme.sidebarBorder} sticky top-0 z-50`}>
+        <header className="sticky top-0 z-50 bg-transparent">
           <div className="px-4 sm:px-6 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-2 sm:gap-3">
+            {/* Left: Toggle Button in Glassy Circle Container */}
+            <div className={`${theme.cardBg} backdrop-blur-xl border ${theme.cardBorder} rounded-full shadow-lg`}>
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className={`p-2 ${theme.hoverBg} rounded-lg transition-colors`}
+                className={`p-3 rounded-full transition-colors`}
                 aria-label="Toggle sidebar"
               >
                 {/* Show ChevronLeft on desktop when sidebar is open, Menu otherwise */}
@@ -146,37 +148,11 @@ export default function UploadPage() {
                   <Menu className={`w-5 h-5 ${theme.textSecondary}`} />
                 </span>
               </button>
-              <div className="flex items-center gap-2 sm:gap-3">
-                <img 
-                  src="/images/parseai-logo.png" 
-                  alt="PARSe AI Logo" 
-                  className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
-                />
-                <div className="hidden sm:block">
-                  <h1 className={`text-lg sm:text-xl font-bold ${theme.text}`}>PARSe AI</h1>
-                  <p className={`text-xs ${theme.textTertiary}`}>Paper Analysis & Research Summarizer</p>
-                </div>
-              </div>
             </div>
+
+            {/* Right: Placeholder for future actions */}
             <div className="flex items-center gap-2 sm:gap-3">
-              {/* Theme Toggle Button */}
-              <button
-                onClick={() => setIsDarkMode(!isDarkMode)}
-                className={`p-2 ${theme.hoverBg} rounded-lg transition-all ${theme.textSecondary} hover:scale-105`}
-                title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-              >
-                {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </button>
-              {stage === 'results' && (
-                <button
-                  onClick={handleNewUpload}
-                  className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 bg-linear-to-r from-[#6366F1] to-[#8B5CF6] text-white rounded-lg hover:scale-105 transition-all duration-200 font-medium text-sm sm:text-base"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  <span className="hidden sm:inline">Upload New</span>
-                  <span className="sm:hidden">New</span>
-                </button>
-              )}
+              {/* Placeholder for future actions */}
             </div>
           </div>
         </header>
