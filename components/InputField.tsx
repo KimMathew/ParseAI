@@ -43,7 +43,7 @@ export default function InputField({
         value={value}
         onChange={onChange}
         required={required}
-        className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/15 text-white placeholder:text-white/40 focus:outline-none focus:border-[#6366F1]/50 focus:ring-1 focus:ring-[#6366F1]/30 transition-all duration-200"
+        className="w-full px-4 py-3 rounded-full bg-white/5 border border-white/15 text-white placeholder:text-white/40 focus:outline-none focus:border-[#6366F1]/50 focus:ring-1 focus:ring-[#6366F1]/30 transition-all duration-200"
         placeholder={placeholder}
       />
     </div>
