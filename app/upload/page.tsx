@@ -253,11 +253,24 @@ export default function UploadPage() {
         uploadHistory={uploadHistory}
         onHistoryClick={handleHistoryClick}
         onNewUpload={handleNewUpload}
+        isCollapsed={!sidebarOpen}
         onThemeToggle={() => setIsDarkMode(!isDarkMode)}
       />
 
       {/* Main Content Area */}
-      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${sidebarOpen ? 'lg:ml-80' : 'lg:ml-0'}`}>
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${sidebarOpen ? 'lg:ml-80' : 'lg:ml-20'} relative`}>
+        {/* Enhanced Background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Grid Pattern */}
+          <div 
+            className="absolute inset-0 opacity-[0.03]"
+            style={{
+              backgroundImage: `linear-gradient(${isDarkMode ? '#fff' : '#000'} 1px, transparent 1px), linear-gradient(90deg, ${isDarkMode ? '#fff' : '#000'} 1px, transparent 1px)`,
+              backgroundSize: '50px 50px'
+            }}
+          ></div>
+        </div>
+
         {/* Header */}
         <header className="sticky top-0 z-50 bg-transparent">
           <div className="px-4 sm:px-6 py-4 flex items-center justify-between">
@@ -265,7 +278,7 @@ export default function UploadPage() {
             <div className={`${theme.cardBg} backdrop-blur-xl border ${theme.cardBorder} rounded-full shadow-lg`}>
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className={`p-3 rounded-full transition-colors`}
+                className={`p-3 cursor-pointer rounded-full transition-colors`}
                 aria-label="Toggle sidebar"
               >
                 {/* Show ChevronLeft on desktop when sidebar is open, Menu otherwise */}
@@ -287,7 +300,7 @@ export default function UploadPage() {
         </header>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto relative z-10">
           <UploadContent
             stage={stage}
             uploadMethod={uploadMethod}

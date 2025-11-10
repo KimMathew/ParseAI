@@ -41,9 +41,9 @@ export default function Home() {
               <h1 className="text-4xl md:text-6xl font-extrabold max-w-3xl mx-auto leading-tight"> Understand any research paper — instantly.</h1>
               <p className="mt-6 text-white/70 max-w-2xl mx-auto">Upload a PDF or paste text. Get structured summaries, keywords, and plain-English explanations powered by PARSe AI.</p>
 
-              <div className="mt-10 flex items-center justify-center gap-6">
+              <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
                 <a
-                  className="inline-block px-6 py-3 rounded-full bg-linear-to-r from-[#6366F1] to-[#8B5CF6] text-white font-medium transition-all duration-200 ease-out transform hover:scale-105 hover:shadow-xl hover:brightness-105 focus:outline-none focus:ring-4 focus:ring-[#6366F140] active:scale-95 cursor-pointer"
+                  className="inline-block w-full sm:w-auto px-6 py-3 rounded-full bg-linear-to-r from-[#6366F1] to-[#8B5CF6] text-white font-medium transition-all duration-200 ease-out transform hover:scale-105 hover:shadow-xl hover:brightness-105 focus:outline-none focus:ring-4 focus:ring-[#6366F140] active:scale-95 cursor-pointer text-center"
                   role="button"
                   onClick={handleTrySummarization}
                 >
@@ -56,7 +56,7 @@ export default function Home() {
                     const el = document.getElementById('features');
                     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
                   }}
-                  className="inline-block px-6 py-3 rounded-full border border-white/10 text-white/80 cursor-pointer transition-all duration-200 ease-out hover:bg-white/4 hover:border-white/20"
+                  className="inline-block w-full sm:w-auto px-6 py-3 rounded-full border border-white/10 text-white/80 cursor-pointer transition-all duration-200 ease-out hover:bg-white/4 hover:border-white/20 text-center"
                 >
                   Explore Features
                 </a>

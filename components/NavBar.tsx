@@ -111,7 +111,7 @@ export default function NavBar() {
             >
               How it Works
             </a>
-            <button onClick={() => { router.push(ROUTES.SIGNIN); setOpen(false); }} className="block w-full px-3 py-2 rounded hover:bg-white/5 transition cursor-pointer text-left">Sign in</button>
+            <button onClick={() => { router.push(ROUTES.SIGNIN); setOpen(false); }} className="block w-full px-3 py-2 rounded hover:bg-white/5 transition cursor-pointer text-center">Sign in</button>
             <button onClick={() => { router.push(ROUTES.SIGNUP); setOpen(false); }} className="block w-full px-3 py-2 rounded-full bg-linear-to-r from-[#6366F1] to-[#8B5CF6] text-white text-center font-medium">Sign Up</button>
           </div>
         </div>
