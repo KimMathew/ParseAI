@@ -5,6 +5,7 @@ import { ChevronLeft, Menu, RotateCcw, Moon, Sun, MessageSquare } from 'lucide-r
 import { getTheme } from '@/lib/theme';
 import UploadSidebar from './components/UploadSidebar';
 import UploadContent from './components/UploadContent';
+import AnimatedBackground from './components/AnimatedBackground';
 import { supabase } from '@/lib/supabaseClient';
 import { getDocumentsByUser, getSummaryByDocumentId, createDocument, createSummary, uploadFileToStorage } from '@/lib/supabaseApi';
 
@@ -259,17 +260,7 @@ export default function UploadPage() {
 
       {/* Main Content Area */}
       <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${sidebarOpen ? 'lg:ml-80' : 'lg:ml-20'} relative`}>
-        {/* Enhanced Background */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {/* Grid Pattern */}
-          <div 
-            className="absolute inset-0 opacity-[0.03]"
-            style={{
-              backgroundImage: `linear-gradient(${isDarkMode ? '#fff' : '#000'} 1px, transparent 1px), linear-gradient(90deg, ${isDarkMode ? '#fff' : '#000'} 1px, transparent 1px)`,
-              backgroundSize: '50px 50px'
-            }}
-          ></div>
-        </div>
+        <AnimatedBackground isDarkMode={isDarkMode} />
 
         {/* Header */}
         <header className="sticky top-0 z-50 bg-transparent">
