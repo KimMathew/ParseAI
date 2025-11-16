@@ -257,15 +257,21 @@ export default function UploadPage() {
         userId={user?.id ?? null}
       />
 
-      {/* Floating Chat Button - Only show in results stage when chat is closed */}
-      {stage === 'results' && !showChat && (
+      {/* Floating Chat Toggle Button - Always show in results stage */}
+      {stage === 'results' && (
         <button
-          onClick={() => setShowChat(true)}
-          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-12 h-12 sm:w-14 sm:h-14 bg-linear-to-r from-[#6366F1] to-[#8B5CF6] text-white rounded-full hover:scale-110 transition-all duration-200 flex items-center justify-center z-50 shadow-2xl"
-          title="Chat with AI"
-          aria-label="Open chat"
+          onClick={() => setShowChat(!showChat)}
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-12 h-12 sm:w-14 sm:h-14 bg-linear-to-r from-[#6366F1] to-[#8B5CF6] text-white rounded-full hover:scale-110 transition-all duration-200 flex items-center justify-center z-50 shadow-2xl cursor-pointer"
+          title={showChat ? "Close chat" : "Chat with AI"}
+          aria-label={showChat ? "Close chat" : "Open chat"}
         >
-          <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6" />
+          {showChat ? (
+            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6" />
+          )}
         </button>
       )}
     </>
