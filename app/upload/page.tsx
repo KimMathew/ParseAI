@@ -119,17 +119,6 @@ export default function UploadPage() {
   const handleSummarize = async () => {
     setError(null);
     setSummaryResult(null);
-    if (!file && !text.trim()) {
-      toast.custom((t) => (
-        <CustomToast
-          type="error"
-          title="Please provide paper text or upload a PDF file."
-          onClose={() => toast.dismiss(t)}
-          isDarkMode={isDarkMode}
-        />
-      ), { duration: 4000 });
-      return;
-    }
     if (!user?.id) {
       toast.custom((t) => (
         <CustomToast

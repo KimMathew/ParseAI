@@ -103,7 +103,7 @@ export default function UploadContent({
           </div>
 
           {/* Upload Method Tabs */}
-          <div className={`${theme.cardBg} ${isDarkMode ? 'backdrop-blur-xl' : ''} rounded-xl border ${theme.cardBorder} overflow-hidden relative transition-all duration-500`}
+          <div className={`${theme.cardBg} ${isDarkMode ? 'backdrop-blur-xl' : ''} rounded-xl overflow-hidden relative transition-all duration-500`}
             style={{
               boxShadow: isDarkMode 
                 ? '0 0 30px 0px rgba(99, 102, 241, 0.5), 0 0 60px 0px rgba(139, 92, 246, 0.4), 0 0 90px 0px rgba(167, 139, 250, 0.3), 0 30px 60px -15px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.05)'
@@ -260,13 +260,18 @@ export default function UploadContent({
 
               <button
                 onClick={onSummarize}
-                disabled={isProcessing}
+                disabled={isProcessing || isUploading || (uploadMethod === 'file' && !file) || (uploadMethod === 'text' && !text.trim())}
                 className="w-full mt-4 sm:mt-5 py-3 md:py-4 bg-linear-to-r from-[#6366F1] to-[#8B5CF6] text-white rounded-full font-semibold text-sm sm:text-base md:text-lg hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isProcessing ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     Analyzing...
+                  </>
+                ) : isUploading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Uploading...
                   </>
                 ) : (
                   <>
