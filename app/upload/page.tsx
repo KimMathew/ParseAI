@@ -2,7 +2,9 @@
 
 import React, { useState } from 'react';
 import { ChevronLeft, Menu, RotateCcw, Moon, Sun, MessageSquare } from 'lucide-react';
+import { toast, Toaster } from 'sonner';
 import { getTheme } from '@/lib/theme';
+import CustomToast from '@/components/CustomToast';
 import UploadSidebar from './components/UploadSidebar';
 import UploadContent from './components/UploadContent';
 import AnimatedBackground from './components/AnimatedBackground';
@@ -118,11 +120,25 @@ export default function UploadPage() {
     setError(null);
     setSummaryResult(null);
     if (!file && !text.trim()) {
-      setError("Please provide paper text or upload a PDF file.");
+      toast.custom((t) => (
+        <CustomToast
+          type="error"
+          title="Please provide paper text or upload a PDF file."
+          onClose={() => toast.dismiss(t)}
+          isDarkMode={isDarkMode}
+        />
+      ), { duration: 4000 });
       return;
     }
     if (!user?.id) {
-      setError("User not authenticated.");
+      toast.custom((t) => (
+        <CustomToast
+          type="error"
+          title="Authentication required"
+          onClose={() => toast.dismiss(t)}
+          isDarkMode={isDarkMode}
+        />
+      ), { duration: 4000 });
       return;
     }
     setIsProcessing(true);
@@ -135,7 +151,17 @@ export default function UploadPage() {
       if (file) {
         const path = `${user.id}/${Date.now()}_${file.name}`;
         const { data: uploadData, error: uploadError } = await uploadFileToStorage(file, path);
-        if (uploadError) throw new Error('File upload failed');
+        if (uploadError) {
+          toast.custom((t) => (
+            <CustomToast
+              type="error"
+              title="File upload failed"
+              onClose={() => toast.dismiss(t)}
+              isDarkMode={isDarkMode}
+            />
+          ), { duration: 5000 });
+          throw new Error('File upload failed');
+        }
         file_url = uploadData?.path || null;
         file_type = file.type.includes('pdf') ? 'pdf' : 'docx';
       } else {
@@ -159,6 +185,14 @@ export default function UploadPage() {
       }
       if (!res.ok) {
         const textBody = await res.text();
+        toast.custom((t) => (
+          <CustomToast
+            type="error"
+            title="Summarization failed"
+            onClose={() => toast.dismiss(t)}
+            isDarkMode={isDarkMode}
+          />
+        ), { duration: 5000 });
         throw new Error(`Server error ${res.status}: ${textBody}`);
       }
       const data = await res.json();
@@ -180,7 +214,17 @@ export default function UploadPage() {
       });
 
       console.log('docData:', docData, 'docError:', docError);
-  if (docError || !docData) throw new Error('Failed to save document');
+  if (docError || !docData) {
+        toast.custom((t) => (
+          <CustomToast
+            type="error"
+            title="Failed to save document"
+            onClose={() => toast.dismiss(t)}
+            isDarkMode={isDarkMode}
+          />
+        ), { duration: 5000 });
+        throw new Error('Failed to save document');
+      }
       const document: any = Array.isArray(docData) ? docData[0] : docData;
       console.log('Document ID to be saved:', document.id);
       if (!document) throw new Error('Document not returned from DB');
@@ -197,15 +241,39 @@ export default function UploadPage() {
       if (summaryError) {
         // eslint-disable-next-line no-console
         console.error('Supabase summary insert error:', summaryError);
-        setError('Failed to save summary: ' + summaryError.message);
+        toast.custom((t) => (
+          <CustomToast
+            type="error"
+            title="Failed to save summary"
+            onClose={() => toast.dismiss(t)}
+            isDarkMode={isDarkMode}
+          />
+        ), { duration: 5000 });
         return;
       }
       // 5. Refetch upload history from Supabase to ensure UI is in sync
       await fetchHistory();
   setSelectedHistory(document.id);
   setCurrentDocumentId(document.id);
+      // Success notification
+      toast.custom((t) => (
+        <CustomToast
+          type="success"
+          title="Paper summarized successfully!"
+          onClose={() => toast.dismiss(t)}
+          isDarkMode={isDarkMode}
+        />
+      ), { duration: 4000 });
       // After setSelectedHistory(document.id);
     } catch (err: any) {
+      toast.custom((t) => (
+        <CustomToast
+          type="error"
+          title="An error occurred"
+          onClose={() => toast.dismiss(t)}
+          isDarkMode={isDarkMode}
+        />
+      ), { duration: 5000 });
       setError(err?.message ?? "An unexpected error occurred.");
     } finally {
       setIsProcessing(false);
@@ -243,9 +311,19 @@ export default function UploadPage() {
   const theme = getTheme(isDarkMode);
 
   return (
-    <div className={`min-h-screen ${theme.bg} flex transition-colors duration-300`}>
-      {/* Sidebar - History Panel */}
-      <UploadSidebar
+    <>
+      <Toaster 
+        position="top-right"
+        expand={false}
+        gap={12}
+        offset={16}
+        toastOptions={{
+          unstyled: true,
+        }}
+      />
+      <div className={`min-h-screen ${theme.bg} flex transition-colors duration-300`}>
+        {/* Sidebar - History Panel */}
+        <UploadSidebar
         sidebarOpen={sidebarOpen}
         selectedHistory={selectedHistory}
         isDarkMode={isDarkMode}
@@ -308,7 +386,6 @@ export default function UploadPage() {
             onFileChange={handleFileChange}
             onTextChange={handleTextChange}
             summaryResult={summaryResult}
-            error={error}
             documentId={currentDocumentId}
             userId={user?.id ?? null}
           />
@@ -326,6 +403,7 @@ export default function UploadPage() {
           <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
       )}
-    </div>
+      </div>
+    </>
   );
 }

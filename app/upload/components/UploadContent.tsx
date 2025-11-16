@@ -20,7 +20,6 @@ type UploadContentProps = {
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onTextChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   summaryResult: Record<string, string> | null;
-  error: string | null;
   // New for chat
   documentId?: string | number | null;
   userId?: string | null;
@@ -41,7 +40,6 @@ export default function UploadContent({
   onFileChange,
   onTextChange,
   summaryResult,
-  error,
   documentId,
   userId,
 }: UploadContentProps) {
@@ -277,11 +275,6 @@ export default function UploadContent({
                   </>
                 )}
               </button>
-              {error && (
-                <div className="mt-3 text-sm text-red-600 text-center">
-                  <strong>Error:</strong> {error}
-                </div>
-              )}
             </div>
           </div>
         </div>
