@@ -88,14 +88,34 @@ export default function UploadContent({
             filter: brightness(1.15);
           }
         }
+        @keyframes gradient-flow {
+          0% {
+            background-position: 0% 50%;
+          }
+          100% {
+            background-position: 200% 50%;
+          }
+        }
       `}</style>
       <div className="h-full flex items-center justify-center px-4 sm:px-6 py-6 sm:py-8">
       {stage === 'upload' ? (
         /* UPLOAD STAGE */
         <div className="w-full max-w-3xl">
           <div className="text-center mb-4 sm:mb-6">
-            <h2 className={`text-xl sm:text-2xl md:text-3xl font-bold ${theme.text} mb-2`}>
-              Transform Research Papers into Clear Insights
+            <h2 className={`text-2xl sm:text-3xl md:text-4xl font-bold ${theme.text} mb-2`}>
+              Transform Research Papers into{' '}
+              <span
+                style={{
+                  background: 'linear-gradient(90deg, #6366F1, #8B5CF6, #22D3EE, #8B5CF6, #6366F1)',
+                  backgroundSize: '200% 100%',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  animation: 'gradient-flow 8s linear infinite',
+                }}
+              >
+                Clear Insights
+              </span>
             </h2>
             <p className={`${theme.textSecondary} text-sm sm:text-base md:text-lg px-2`}>
               Upload a PDF or paste text to get AI-powered summaries in seconds
@@ -105,10 +125,10 @@ export default function UploadContent({
           {/* Upload Method Tabs */}
           <div className={`${theme.cardBg} ${isDarkMode ? 'backdrop-blur-xl' : ''} rounded-xl overflow-hidden relative transition-all duration-500`}
             style={{
-              boxShadow: isDarkMode 
-                ? '0 0 30px 0px rgba(99, 102, 241, 0.5), 0 0 60px 0px rgba(139, 92, 246, 0.4), 0 0 90px 0px rgba(167, 139, 250, 0.3), 0 30px 60px -15px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.05)'
-                : '0 0 30px 0px rgba(99, 102, 241, 0.35), 0 0 60px 0px rgba(139, 92, 246, 0.25), 0 0 90px 0px rgba(167, 139, 250, 0.15), 0 30px 60px -15px rgba(0, 0, 0, 0.12), inset 0 1px 0 0 rgba(255, 255, 255, 0.8)',
-              animation: 'pulse-glow 4s ease-in-out infinite'
+              // boxShadow: isDarkMode 
+              //   ? '0 0 30px 0px rgba(99, 102, 241, 0.5), 0 0 60px 0px rgba(139, 92, 246, 0.4), 0 0 90px 0px rgba(167, 139, 250, 0.3), 0 30px 60px -15px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.05)'
+              //   : '0 0 30px 0px rgba(99, 102, 241, 0.35), 0 0 60px 0px rgba(139, 92, 246, 0.25), 0 0 90px 0px rgba(167, 139, 250, 0.15), 0 30px 60px -15px rgba(0, 0, 0, 0.12), inset 0 1px 0 0 rgba(255, 255, 255, 0.8)',
+              // animation: 'pulse-glow 4s ease-in-out infinite'
             }}
           >
             <div className={`flex border-b ${theme.cardBorder}`}>
@@ -246,12 +266,24 @@ export default function UploadContent({
                 </div>
               ) : (
                 <div>
-                  <textarea
-                    placeholder="Paste your research paper text here..."
-                    className={`w-full min-h-[230px] sm:min-h-[270px] md:min-h-[290px] p-3 sm:p-4 ${theme.inputBg} border ${theme.inputBorder} rounded-xl focus:ring-2 focus:ring-[#6366F1] focus:border-transparent resize-none text-sm sm:text-base ${theme.inputText} ${theme.inputPlaceholder}`}
-                    value={text}
-                    onChange={onTextChange}
-                  />
+                  <div className="relative">
+                    <textarea
+                      placeholder="Paste your research paper text here..."
+                      className={`w-full min-h-[230px] sm:min-h-[270px] md:min-h-[290px] p-3 sm:p-4 ${text ? 'pb-12' : ''} ${theme.inputBg} border ${theme.inputBorder} rounded-xl focus:ring-2 focus:ring-[#6366F1] focus:border-transparent resize-none text-sm sm:text-base ${theme.inputText} ${theme.inputPlaceholder}`}
+                      value={text}
+                      onChange={onTextChange}
+                    />
+                    {text && (
+                      <button
+                        onClick={() => onTextChange({ target: { value: '' } } as any)}
+                        className={`absolute bottom-4 right-3 inline-flex items-center gap-1.5 px-3 py-1.5 ${theme.cardBg} backdrop-blur-sm border ${theme.cardBorder} rounded-lg transition-all ${theme.textSecondary} hover:text-red-500 cursor-pointer shadow-lg z-10 text-xs font-medium`}
+                        title="Clear text"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        Clear
+                      </button>
+                    )}
+                  </div>
                   <p className={`text-xs ${theme.textMuted} mt-2`}>
                     Paste the full paper here
                   </p>
