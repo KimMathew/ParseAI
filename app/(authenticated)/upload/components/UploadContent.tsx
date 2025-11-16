@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Upload, FileText, Sparkles, Download, Copy, Trash2, File } from 'lucide-react';
-import ChatSidebar from './ChatSidebar';
+import ChatSidebar from '@/components/Chat';
 
 type UploadContentProps = {
   stage: string;
@@ -341,7 +341,7 @@ export default function UploadContent({
           </div>
 
           {/* Summaries from backend */}
-          <div className="space-y-3 sm:space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
             {summaryResult && Object.keys(summaryResult).length > 0 ? (
               <>
                 {/* Show main sections */}
@@ -367,7 +367,7 @@ export default function UploadContent({
                         </span>
                         {section}
                       </h4>
-                      <p className="text-white/90 leading-relaxed text-sm sm:text-base">
+                      <p className="text-white/90 leading-relaxed text-sm sm:text-base text-justify">
                         {summaryResult[section]}
                       </p>
                     </div>
@@ -385,7 +385,7 @@ export default function UploadContent({
                         </span>
                         Keywords
                       </h4>
-                      <p className="text-white/90 leading-relaxed text-sm sm:text-base whitespace-pre-line">{summaryResult["Keywords"]}</p>
+                      <p className="text-white/90 leading-relaxed text-sm sm:text-base whitespace-pre-line text-justify">{summaryResult["Keywords"]}</p>
                     </div>
                   )}
                 {/* Show any other sections returned by backend that aren't in main sections or Keywords */}
@@ -394,7 +394,7 @@ export default function UploadContent({
                   .map((section) => (
                     <div key={section} className="rounded-xl shadow-lg p-4 sm:p-6 transition-transform duration-300 hover:-translate-y-1 bg-white/10">
                       <h4 className="text-base sm:text-lg font-bold text-blue-700 mb-2">{section}</h4>
-                      <p className="text-white/90 leading-relaxed text-sm sm:text-base">{summaryResult[section]}</p>
+                      <p className="text-white/90 leading-relaxed text-sm sm:text-base text-justify">{summaryResult[section]}</p>
                     </div>
                   ))}
               </>

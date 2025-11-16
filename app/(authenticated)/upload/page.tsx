@@ -1,13 +1,11 @@
 "use client";
 
 import React, { useState } from 'react';
-import { ChevronLeft, Menu, RotateCcw, Moon, Sun, MessageSquare } from 'lucide-react';
-import { toast, Toaster } from 'sonner';
+import { MessageSquare } from 'lucide-react';
+import { toast } from 'sonner';
 import { getTheme } from '@/lib/theme';
 import CustomToast from '@/components/CustomToast';
-import UploadSidebar from './components/UploadSidebar';
 import UploadContent from './components/UploadContent';
-import AnimatedBackground from './components/AnimatedBackground';
 import { supabase } from '@/lib/supabaseClient';
 import { getDocumentsByUser, getSummaryByDocumentId, createDocument, createSummary, uploadFileToStorage } from '@/lib/supabaseApi';
 
@@ -16,87 +14,27 @@ export default function UploadPage() {
   const [uploadMethod, setUploadMethod] = useState('file');
   const [isProcessing, setIsProcessing] = useState(false);
   const [showChat, setShowChat] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false); // Changed default to false for mobile-first
-  const [selectedHistory, setSelectedHistory] = useState<number | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [file, setFile] = useState<File | null>(null);
   const [text, setText] = useState<string>("");
   const [summaryResult, setSummaryResult] = useState<any>(null);
   const [currentDocumentId, setCurrentDocumentId] = useState<string | number | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  // User state
   const [user, setUser] = useState<any>(null);
-  // Upload history state
-  const [uploadHistory, setUploadHistory] = useState<any[]>([]);
 
   // Fetch user from Supabase auth
   React.useEffect(() => {
     const fetchUser = async () => {
       const { data, error } = await supabase.auth.getUser();
       if (data?.user) {
-        let avatarSource = data.user.user_metadata?.name || data.user.email || '';
-        let avatar = avatarSource.trim().length > 0 ? avatarSource.slice(0,2).toUpperCase() : 'U';
         setUser({
           id: data.user.id,
           name: data.user.user_metadata?.name || data.user.email,
           email: data.user.email,
-          avatar,
         });
       }
     };
     fetchUser();
-  }, []);
-
-  // Fetch upload history for this user
-  const fetchHistory = async () => {
-    if (!user?.id) return;
-    const { data: docs, error } = await getDocumentsByUser(user.id);
-    if (error) return;
-    const items = await Promise.all((docs || []).map(async (doc: any) => {
-      const { data: summary } = await getSummaryByDocumentId(doc.id);
-      // Compose summaryResult object for UploadContent
-      const summaryResult = summary ? {
-        Abstract: summary.abstract_summary,
-        Introduction: summary.introduction_summary,
-        Methodology: summary.methodology_summary,
-        Conclusion: summary.conclusion_summary,
-        Keywords: summary.keywords,
-      } : null;
-      return {
-        id: doc.id,
-        title: doc.title,
-        type: doc.file_type || 'text',
-        timestamp: new Date(doc.created_at).toLocaleString(),
-        preview: summary?.keywords || summary?.abstract_summary || 'No preview',
-        summaryResult,
-        file_url: doc.file_url,
-      };
-    }));
-    setUploadHistory(items);
-  };
-
-  React.useEffect(() => {
-    fetchHistory();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
-
-  // Set sidebar open by default on desktop
-  React.useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 1024) { // lg breakpoint
-        setSidebarOpen(true);
-      } else {
-        setSidebarOpen(false);
-      }
-    };
-    
-    // Set initial state
-    handleResize();
-    
-    // Listen for window resize
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
 
@@ -117,6 +55,9 @@ export default function UploadPage() {
 
   // Backend integration for summarization
   const handleSummarize = async () => {
+    // TOGGLE THIS TO USE MOCK DATA (true = mock, false = real backend)
+    const USE_MOCK_DATA = true;
+    
     setError(null);
     setSummaryResult(null);
     if (!user?.id) {
@@ -131,6 +72,33 @@ export default function UploadPage() {
       return;
     }
     setIsProcessing(true);
+    
+    // Mock data bypass
+    if (USE_MOCK_DATA) {
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate processing
+      const mockData = {
+        Abstract: "This groundbreaking research explores the intersection of quantum computing and machine learning algorithms. We present a novel hybrid approach that combines quantum annealing with classical neural networks to solve complex optimization problems. Our method demonstrates significant improvements in computational efficiency and accuracy compared to traditional approaches.",
+        Introduction: "Recent advances in quantum computing have opened new possibilities for solving computationally intensive problems. Machine learning, particularly deep learning, has revolutionized various fields but faces scalability challenges. This paper introduces QuaNN (Quantum-enhanced Neural Networks), a framework that leverages quantum computing principles to enhance neural network training and inference.",
+        Methodology: "We developed a hybrid architecture consisting of three main components: (1) a quantum annealing layer for feature extraction, (2) a classical convolutional neural network for pattern recognition, and (3) a quantum-classical interface layer for seamless integration. The quantum layer uses a 128-qubit system to perform parallel feature space exploration. Training was conducted using a custom optimization algorithm that alternates between quantum and classical parameter updates.",
+        Results: "Our experiments on three benchmark datasets (MNIST, CIFAR-10, and ImageNet) show that QuaNN achieves 23% faster training times and 15% higher accuracy compared to purely classical approaches. The quantum layer demonstrated particular effectiveness in high-dimensional feature spaces, reducing the required training epochs by 40%. Energy consumption was reduced by 35% during inference, making the approach more sustainable for large-scale deployments.",
+        Conclusion: "This work demonstrates the viability of quantum-classical hybrid systems for practical machine learning applications. The QuaNN framework provides a scalable solution that can be adapted to various neural network architectures. Future work will focus on expanding to larger quantum systems and exploring applications in natural language processing and reinforcement learning.",
+        Keywords: "quantum computing, machine learning, neural networks, hybrid algorithms, quantum annealing, optimization, deep learning, computational efficiency"
+      };
+      setSummaryResult(mockData);
+      setStage('results');
+      setIsProcessing(false);
+      
+      toast.custom((t) => (
+        <CustomToast
+          type="success"
+          title="Mock data loaded successfully!"
+          onClose={() => toast.dismiss(t)}
+          isDarkMode={isDarkMode}
+        />
+      ), { duration: 4000 });
+      return;
+    }
+    
     try {
       let res: Response;
       let file_url = null;
@@ -240,10 +208,7 @@ export default function UploadPage() {
         ), { duration: 5000 });
         return;
       }
-      // 5. Refetch upload history from Supabase to ensure UI is in sync
-      await fetchHistory();
-  setSelectedHistory(document.id);
-  setCurrentDocumentId(document.id);
+      setCurrentDocumentId(document.id);
       // Success notification
       toast.custom((t) => (
         <CustomToast
@@ -269,117 +234,28 @@ export default function UploadPage() {
     }
   };
 
-  const handleNewUpload = () => {
-    setStage('upload');
-    setUploadMethod('file');
-    setShowChat(false);
-    setSelectedHistory(null);
-    setFile(null);
-    setText("");
-    setSummaryResult(null);
-    setError(null);
-    // Close sidebar on mobile when starting new upload
-    if (window.innerWidth < 1024) {
-      setSidebarOpen(false);
-    }
-  };
-
-  const handleHistoryClick = (item: any) => {
-    setSelectedHistory(item.id);
-    setSummaryResult(item.summaryResult);
-    setCurrentDocumentId(item.id);
-    setStage('results');
-    setShowChat(false);
-    // Close sidebar on mobile after selection
-    if (window.innerWidth < 1024) {
-      setSidebarOpen(false);
-    }
-  };
-
-  // Get theme configuration
   const theme = getTheme(isDarkMode);
 
   return (
     <>
-      <Toaster 
-        position="top-right"
-        expand={false}
-        gap={12}
-        offset={16}
-        toastOptions={{
-          unstyled: true,
-        }}
-      />
-      <div className={`min-h-screen ${theme.bg} flex transition-colors duration-300`}>
-        {/* Sidebar - History Panel */}
-        <UploadSidebar
-        sidebarOpen={sidebarOpen}
-        selectedHistory={selectedHistory}
+      <UploadContent
+        stage={stage}
+        uploadMethod={uploadMethod}
+        isProcessing={isProcessing}
+        showChat={showChat}
         isDarkMode={isDarkMode}
         theme={theme}
-        user={user ?? { name: '', email: '', avatar: 'U' }}
-        uploadHistory={uploadHistory}
-        onHistoryClick={handleHistoryClick}
-        onNewUpload={handleNewUpload}
-        isCollapsed={!sidebarOpen}
-        onThemeToggle={() => setIsDarkMode(!isDarkMode)}
+        onUploadMethodChange={setUploadMethod}
+        onSummarize={handleSummarize}
+        onShowChat={setShowChat}
+        file={file}
+        text={text}
+        onFileChange={handleFileChange}
+        onTextChange={handleTextChange}
+        summaryResult={summaryResult}
+        documentId={currentDocumentId}
+        userId={user?.id ?? null}
       />
-
-      {/* Main Content Area */}
-      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${sidebarOpen ? 'lg:ml-80' : 'lg:ml-20'} relative`}>
-        <AnimatedBackground isDarkMode={isDarkMode} />
-
-        {/* Header */}
-        <header className="sticky top-0 z-50 bg-transparent">
-          <div className="px-4 sm:px-6 py-4 flex items-center justify-between">
-            {/* Left: Toggle Button in Glassy Circle Container */}
-            <div className={`${theme.cardBg} backdrop-blur-xl border ${theme.cardBorder} rounded-full shadow-lg`}>
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className={`p-3 cursor-pointer rounded-full transition-colors`}
-                aria-label="Toggle sidebar"
-              >
-                {/* Show ChevronLeft on desktop when sidebar is open, Menu otherwise */}
-                <span className="hidden lg:block">
-                  {sidebarOpen ? <ChevronLeft className={`w-5 h-5 ${theme.textSecondary}`} /> : <Menu className={`w-5 h-5 ${theme.textSecondary}`} />}
-                </span>
-                {/* Always show Menu icon on mobile */}
-                <span className="lg:hidden">
-                  <Menu className={`w-5 h-5 ${theme.textSecondary}`} />
-                </span>
-              </button>
-            </div>
-
-            {/* Right: Placeholder for future actions */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              {/* Placeholder for future actions */}
-            </div>
-          </div>
-        </header>
-
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto relative z-10">
-          <UploadContent
-            stage={stage}
-            uploadMethod={uploadMethod}
-            isProcessing={isProcessing}
-            showChat={showChat}
-            isDarkMode={isDarkMode}
-            theme={theme}
-            onUploadMethodChange={setUploadMethod}
-            onSummarize={handleSummarize}
-            onShowChat={setShowChat}
-            // New props for backend integration
-            file={file}
-            text={text}
-            onFileChange={handleFileChange}
-            onTextChange={handleTextChange}
-            summaryResult={summaryResult}
-            documentId={currentDocumentId}
-            userId={user?.id ?? null}
-          />
-        </div>
-      </div>
 
       {/* Floating Chat Button - Only show in results stage when chat is closed */}
       {stage === 'results' && !showChat && (
@@ -392,7 +268,6 @@ export default function UploadPage() {
           <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
       )}
-      </div>
     </>
   );
 }
