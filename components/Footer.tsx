@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export default function Footer() {
   return (
     <footer className="relative border-t border-white/10 bg-linear-to-b from-[#0B0C10] to-[#000000] py-16">
@@ -7,9 +9,13 @@ export default function Footer() {
           {/* Brand Column */}
           <div className="md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-linear-to-br from-[#6366F1] to-[#8B5CF6] flex items-center justify-center">
-                <span className="text-white font-bold text-sm">P</span>
-              </div>
+              <Image
+                src="/images/parseai-logo.png"
+                alt="PARSe AI Logo"
+                width={32}
+                height={32}
+                className="rounded-lg"
+              />
               <span className="font-bold text-lg">PARSe AI</span>
             </div>
             <p className="text-white/50 text-sm">

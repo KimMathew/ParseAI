@@ -5,6 +5,7 @@ import { ChevronLeft, Menu, RotateCcw, Moon, Sun, MessageSquare } from 'lucide-r
 import { getTheme } from '@/lib/theme';
 import UploadSidebar from './components/UploadSidebar';
 import UploadContent from './components/UploadContent';
+import AnimatedBackground from './components/AnimatedBackground';
 import { supabase } from '@/lib/supabaseClient';
 import { getDocumentsByUser, getSummaryByDocumentId, createDocument, createSummary, uploadFileToStorage } from '@/lib/supabaseApi';
 
@@ -253,11 +254,14 @@ export default function UploadPage() {
         uploadHistory={uploadHistory}
         onHistoryClick={handleHistoryClick}
         onNewUpload={handleNewUpload}
+        isCollapsed={!sidebarOpen}
         onThemeToggle={() => setIsDarkMode(!isDarkMode)}
       />
 
       {/* Main Content Area */}
-      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${sidebarOpen ? 'lg:ml-80' : 'lg:ml-0'}`}>
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${sidebarOpen ? 'lg:ml-80' : 'lg:ml-20'} relative`}>
+        <AnimatedBackground isDarkMode={isDarkMode} />
+
         {/* Header */}
         <header className="sticky top-0 z-50 bg-transparent">
           <div className="px-4 sm:px-6 py-4 flex items-center justify-between">
@@ -265,7 +269,7 @@ export default function UploadPage() {
             <div className={`${theme.cardBg} backdrop-blur-xl border ${theme.cardBorder} rounded-full shadow-lg`}>
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className={`p-3 rounded-full transition-colors`}
+                className={`p-3 cursor-pointer rounded-full transition-colors`}
                 aria-label="Toggle sidebar"
               >
                 {/* Show ChevronLeft on desktop when sidebar is open, Menu otherwise */}
@@ -287,7 +291,7 @@ export default function UploadPage() {
         </header>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto relative z-10">
           <UploadContent
             stage={stage}
             uploadMethod={uploadMethod}

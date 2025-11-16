@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Upload, FileText, Sparkles, Download, Copy } from 'lucide-react';
+import { Upload, FileText, Sparkles, Download, Copy, Trash2, File } from 'lucide-react';
 import ChatSidebar from './ChatSidebar';
 
 type UploadContentProps = {
@@ -45,8 +45,53 @@ export default function UploadContent({
   documentId,
   userId,
 }: UploadContentProps) {
+  const [uploadProgress, setUploadProgress] = React.useState(0);
+  const [isUploading, setIsUploading] = React.useState(false);
+
+  // Simulate file upload progress
+  React.useEffect(() => {
+    if (file && !isUploading) {
+      setIsUploading(true);
+      setUploadProgress(0);
+      
+      // Animate progress from 0 to 100 over 2.5 seconds
+      const duration = 2500; // 2.5 seconds
+      const steps = 50;
+      const increment = 100 / steps;
+      const interval = duration / steps;
+      
+      let currentProgress = 0;
+      const timer = setInterval(() => {
+        currentProgress += increment;
+        if (currentProgress >= 100) {
+          setUploadProgress(100);
+          clearInterval(timer);
+          setTimeout(() => setIsUploading(false), 200);
+        } else {
+          setUploadProgress(currentProgress);
+        }
+      }, interval);
+      
+      return () => clearInterval(timer);
+    } else if (!file) {
+      setUploadProgress(0);
+      setIsUploading(false);
+    }
+  }, [file]);
+
   return (
-    <div className="h-full flex items-center justify-center px-4 sm:px-6 py-6 sm:py-8">
+    <>
+      <style jsx>{`
+        @keyframes pulse-glow {
+          0%, 100% {
+            filter: brightness(1);
+          }
+          50% {
+            filter: brightness(1.15);
+          }
+        }
+      `}</style>
+      <div className="h-full flex items-center justify-center px-4 sm:px-6 py-6 sm:py-8">
       {stage === 'upload' ? (
         /* UPLOAD STAGE */
         <div className="w-full max-w-3xl">
@@ -60,11 +105,18 @@ export default function UploadContent({
           </div>
 
           {/* Upload Method Tabs */}
-          <div className={`${theme.cardBg} ${isDarkMode ? 'backdrop-blur-xl' : ''} rounded-xl shadow-lg border ${theme.cardBorder} overflow-hidden`}>
+          <div className={`${theme.cardBg} ${isDarkMode ? 'backdrop-blur-xl' : ''} rounded-xl border ${theme.cardBorder} overflow-hidden relative transition-all duration-500`}
+            style={{
+              boxShadow: isDarkMode 
+                ? '0 0 30px 0px rgba(99, 102, 241, 0.5), 0 0 60px 0px rgba(139, 92, 246, 0.4), 0 0 90px 0px rgba(167, 139, 250, 0.3), 0 30px 60px -15px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.05)'
+                : '0 0 30px 0px rgba(99, 102, 241, 0.35), 0 0 60px 0px rgba(139, 92, 246, 0.25), 0 0 90px 0px rgba(167, 139, 250, 0.15), 0 30px 60px -15px rgba(0, 0, 0, 0.12), inset 0 1px 0 0 rgba(255, 255, 255, 0.8)',
+              animation: 'pulse-glow 4s ease-in-out infinite'
+            }}
+          >
             <div className={`flex border-b ${theme.cardBorder}`}>
               <button
                 onClick={() => onUploadMethodChange('file')}
-                className={`flex-1 flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-6 py-2.5 sm:py-3 font-medium transition-all text-sm sm:text-base ${
+                className={`flex-1 flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-6 py-2.5 sm:py-3 font-medium transition-all text-sm sm:text-base cursor-pointer ${
                   uploadMethod === 'file'
                     ? 'bg-linear-to-r from-[#6366F1] to-[#8B5CF6] text-white'
                     : `${theme.tabInactive} ${theme.tabInactiveBg}`
@@ -76,7 +128,7 @@ export default function UploadContent({
               </button>
               <button
                 onClick={() => onUploadMethodChange('text')}
-                className={`flex-1 flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-6 py-2.5 sm:py-3 font-medium transition-all text-sm sm:text-base ${
+                className={`flex-1 flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-6 py-2.5 sm:py-3 font-medium transition-all text-sm sm:text-base cursor-pointer ${
                   uploadMethod === 'text'
                     ? 'bg-linear-to-r from-[#6366F1] to-[#8B5CF6] text-white'
                     : `${theme.tabInactive} ${theme.tabInactiveBg}`
@@ -91,35 +143,114 @@ export default function UploadContent({
             <div className="p-4 sm:p-6 md:p-8">
 
               {uploadMethod === 'file' ? (
-                <label
-                  className={`border-2 border-dashed ${theme.uploadBorder} rounded-xl p-6 sm:p-8 md:p-12 text-center ${theme.uploadHoverBorder} ${theme.uploadHoverBg} transition-all cursor-pointer block`}
-                  htmlFor="file-upload-input"
-                  style={{ position: 'relative' }}
-                >
-                  <Upload className={`w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 mx-auto ${theme.textMuted} mb-3 sm:mb-4`} />
-                  <p className={`text-sm sm:text-base md:text-lg font-medium ${theme.text} mb-2`}>
-                    Drop your research paper here
-                  </p>
-                  <p className={`text-xs sm:text-sm ${theme.textTertiary} mb-2 sm:mb-3`}>
-                    or click to browse files
-                  </p>
-                  <p className={`text-xs ${theme.textMuted}`}>
-                    Supports PDF and DOCX (Max 25MB)
-                  </p>
-                  <input
-                    id="file-upload-input"
-                    type="file"
-                    accept="application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                    onChange={onFileChange}
-                    style={{ display: 'none' }}
-                  />
-                  {file && <div className="text-xs mt-2 text-center">Selected: {file.name}</div>}
-                </label>
+                <div>
+                  <label
+                    className={`border-2 border-dashed ${theme.uploadBorder} rounded-xl p-6 sm:p-8 md:p-12 text-center ${!file ? `${theme.uploadHoverBorder} ${theme.uploadHoverBg} cursor-pointer` : ''} transition-all block min-h-[260px] sm:min-h-[300px] md:min-h-[320px] flex flex-col items-center justify-center`}
+                    htmlFor="file-upload-input"
+                  >
+                    {!file ? (
+                      <>
+                        <Upload className={`w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 mx-auto ${theme.textMuted} mb-3 sm:mb-4`} />
+                        <p className={`text-sm sm:text-base md:text-lg font-medium ${theme.text} mb-2`}>
+                          Drop your research paper here
+                        </p>
+                        <p className={`text-xs sm:text-sm ${theme.textTertiary} mb-2 sm:mb-3`}>
+                          or click to browse files
+                        </p>
+                        <p className={`text-xs ${theme.textMuted}`}>
+                          Supports PDF and DOCX (Max 25MB)
+                        </p>
+                      </>
+                    ) : (
+                      <div onClick={(e) => e.preventDefault()}>
+                        {/* File Icon with type badge */}
+                        <div className="relative inline-block mb-4">
+                          {uploadProgress === 100 && !isUploading ? (
+                            /* Checkmark replaces the entire file icon when complete */
+                            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                              <div className="w-10 h-10 bg-[#10B981] rounded-full flex items-center justify-center">
+                                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                              </div>
+                            </div>
+                          ) : (
+                            /* File icon during upload */
+                            <div className="w-16 h-20 bg-white/5 rounded-lg flex items-center justify-center border border-white/10">
+                              <div className="text-center">
+                                <FileText className={`w-8 h-8 ${theme.textMuted} mx-auto mb-1`} />
+                                <div className="text-[10px] font-bold text-white/60 uppercase">
+                                  {file.type.includes('pdf') ? 'PDF' : 'DOCX'}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Upload Status Text */}
+                        <p className={`text-sm sm:text-base font-semibold ${theme.text} mb-2 sm:mb-3`}>
+                          {isUploading ? 'Uploading Document...' : 'Upload Complete'}
+                        </p>
+                        
+                        {/* File Name */}
+                        <p className={`text-xs sm:text-sm ${theme.textMuted} truncate max-w-[300px] mx-auto`}>
+                          {file.name}
+                        </p>
+
+                        {/* File Size - Only show when upload is complete */}
+                        {uploadProgress === 100 && !isUploading && (
+                          <p className={`text-xs ${theme.textMuted} mb-4`}>
+                            {(file.size / 1024).toFixed(2)} KB
+                          </p>
+                        )}
+
+                        {/* Progress Bar - Only show during upload */}
+                        {isUploading && (
+                          <div className="mb-3 mt-4">
+                            <div className="h-1.5 bg-white/10 rounded-full overflow-hidden mb-2">
+                              <div 
+                                className="h-full bg-linear-to-r from-[#6366F1] to-[#8B5CF6] rounded-full transition-all duration-100 ease-linear" 
+                                style={{ width: `${uploadProgress}%` }}
+                              ></div>
+                            </div>
+                            <p className={`text-xs ${theme.textMuted}`}>
+                              {Math.round(uploadProgress)}%
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Clear Upload Button */}
+                        {uploadProgress === 100 && !isUploading && (
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              const input = document.getElementById('file-upload-input') as HTMLInputElement;
+                              if (input) input.value = '';
+                              onFileChange({ target: { files: null } } as any);
+                            }}
+                            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${theme.textSecondary} hover:text-red-500 text-xs font-medium cursor-pointer`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            Clear Upload
+                          </button>
+                        )}
+                      </div>
+                    )}
+                    <input
+                      id="file-upload-input"
+                      type="file"
+                      accept="application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                      onChange={onFileChange}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
+                </div>
               ) : (
                 <div>
                   <textarea
                     placeholder="Paste your research paper text here..."
-                    className={`w-full h-40 sm:h-48 md:h-56 p-3 sm:p-4 ${theme.inputBg} border ${theme.inputBorder} rounded-xl focus:ring-2 focus:ring-[#6366F1] focus:border-transparent resize-none text-sm sm:text-base ${theme.inputText} ${theme.inputPlaceholder}`}
+                    className={`w-full min-h-[230px] sm:min-h-[270px] md:min-h-[290px] p-3 sm:p-4 ${theme.inputBg} border ${theme.inputBorder} rounded-xl focus:ring-2 focus:ring-[#6366F1] focus:border-transparent resize-none text-sm sm:text-base ${theme.inputText} ${theme.inputPlaceholder}`}
                     value={text}
                     onChange={onTextChange}
                   />
@@ -132,7 +263,7 @@ export default function UploadContent({
               <button
                 onClick={onSummarize}
                 disabled={isProcessing}
-                className="w-full mt-4 sm:mt-5 py-3 md:py-4 bg-linear-to-r from-[#6366F1] to-[#8B5CF6] text-white rounded-xl font-semibold text-sm sm:text-base md:text-lg hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full mt-4 sm:mt-5 py-3 md:py-4 bg-linear-to-r from-[#6366F1] to-[#8B5CF6] text-white rounded-full font-semibold text-sm sm:text-base md:text-lg hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isProcessing ? (
                   <>
@@ -255,5 +386,6 @@ export default function UploadContent({
           />
         )}
       </div>
-    );
-  }
+    </>
+  );
+}
