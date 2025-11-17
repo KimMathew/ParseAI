@@ -100,7 +100,7 @@ export default function ChatSidebar({
 
   return (
     <div className="fixed inset-x-4 bottom-20 sm:inset-x-auto sm:bottom-24 sm:right-6 sm:w-96 h-[calc(100vh-7rem)] sm:h-[500px] max-h-[500px] sm:max-h-[500px] z-40 animate-in slide-in-from-bottom-4 duration-300">
-      <div className={`${theme.cardBg} ${isDarkMode ? 'backdrop-blur-xl' : ''} rounded-2xl shadow-2xl h-full flex flex-col overflow-hidden`}>
+      <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl shadow-2xl h-full flex flex-col overflow-hidden`}>
         {/* Header */}
         <div className="bg-linear-to-r from-[#6366F1] to-[#8B5CF6] p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
           <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-full flex items-center justify-center border border-white/30">
@@ -114,20 +114,20 @@ export default function ChatSidebar({
 
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3">
-          <div className={`${isDarkMode ? 'bg-white/10' : 'bg-slate-100'} rounded-lg p-3 border ${theme.cardBorder}`}>
+          <div className={`${isDarkMode ? 'bg-gray-700' : 'bg-slate-100'} rounded-lg p-3 border ${theme.cardBorder}`}>
             <p className={`text-xs sm:text-sm ${theme.textSecondary}`}>
               👋 Hi! I've analyzed your paper. Ask me anything about the methodology, results, or any specific section.
             </p>
           </div>
           {messages.map((msg, idx) => (
-            <div key={msg.id} className={`rounded-lg p-3 border ${theme.cardBorder} ${msg.user_id === userId ? (isDarkMode ? 'bg-[#6366F1]/20' : 'bg-[#6366F1]/10') : (isDarkMode ? 'bg-white/10' : 'bg-slate-100')}`}>
+            <div key={msg.id} className={`rounded-lg p-3 border ${theme.cardBorder} ${msg.user_id === userId ? (isDarkMode ? 'bg-gray-700' : 'bg-[#6366F1]/10') : (isDarkMode ? 'bg-gray-700' : 'bg-slate-100')}`}>
               <div className="mb-1">
                 <span className={`font-semibold text-xs ${theme.text}`}>{msg.user_id === userId ? 'You' : 'AI'}</span>
                 <span className="ml-2 text-xs text-gray-400">{new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
               </div>
               <div className={`text-xs sm:text-sm ${theme.text}`}>{msg.question}</div>
               {msg.answer && (
-                <div className={`mt-2 text-xs sm:text-sm ${theme.textSecondary} border-t pt-2 ${isDarkMode ? 'border-white/10' : 'border-slate-200'}`}>
+                <div className={`mt-2 text-xs sm:text-sm ${theme.textSecondary} border-t pt-2 ${isDarkMode ? 'border-gray-600' : 'border-slate-200'}`}>
                   {msg.answer}
                 </div>
               )}
@@ -137,7 +137,7 @@ export default function ChatSidebar({
         </div>
 
         {/* Input Area */}
-        <div className={`p-3 sm:p-4 border-t ${theme.cardBorder} bg-linear-to-t ${isDarkMode ? 'from-[#1F2937]/50' : 'from-slate-50/50'}`}>
+        <div className={`p-3 sm:p-4 border-t ${theme.cardBorder} ${isDarkMode ? 'bg-gray-750' : 'bg-slate-50'}`}>
           <div className="flex gap-2">
             <input
               type="text"

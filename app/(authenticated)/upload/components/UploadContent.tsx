@@ -21,6 +21,8 @@ type UploadContentProps = {
   summaryResult: Record<string, string> | null;
   documentId?: string | number | null;
   userId?: string | null;
+  pdfTitle?: string;
+  uploadDate?: string;
 };
 
 export default function UploadContent(props: UploadContentProps) {
@@ -48,6 +50,8 @@ export default function UploadContent(props: UploadContentProps) {
           summaryResult={props.summaryResult}
           documentId={props.documentId}
           userId={props.userId}
+          pdfTitle={props.pdfTitle}
+          uploadDate={props.uploadDate}
         />
       )}
     </div>

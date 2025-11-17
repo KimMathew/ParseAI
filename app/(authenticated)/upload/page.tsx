@@ -24,6 +24,8 @@ export default function UploadPage() {
   const [currentDocumentId, setCurrentDocumentId] = useState<string | number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
+  const [pdfTitle, setPdfTitle] = useState<string>('');
+  const [uploadDate, setUploadDate] = useState<string>('');
 
   // Load selected history item from context
   React.useEffect(() => {
@@ -31,6 +33,11 @@ export default function UploadPage() {
       // Load history item - show results
       setSummaryResult(selectedHistoryItem.summaryResult);
       setCurrentDocumentId(selectedHistoryItem.id);
+      setPdfTitle(selectedHistoryItem.title);
+      // Format timestamp to show only date
+      const date = new Date(selectedHistoryItem.created_at);
+      const formattedDate = `Uploaded on ${date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`;
+      setUploadDate(formattedDate);
       setStage('results');
       setShowChat(false);
     } else if (selectedHistoryItem === null) {
@@ -38,6 +45,8 @@ export default function UploadPage() {
       setStage('upload');
       setSummaryResult(null);
       setCurrentDocumentId(null);
+      setPdfTitle('');
+      setUploadDate('');
       setShowChat(false);
       setFile(null);
       setText('');
@@ -107,6 +116,14 @@ export default function UploadPage() {
         Keywords: "quantum computing, machine learning, neural networks, hybrid algorithms, quantum annealing, optimization, deep learning, computational efficiency"
       };
       setSummaryResult(mockData);
+      
+      // Set PDF title and upload date for mock data
+      const mockTitle = file ? file.name : "Mock Research Paper";
+      setPdfTitle(mockTitle);
+      const currentDate = new Date();
+      const formattedDate = `Uploaded on ${currentDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`;
+      setUploadDate(formattedDate);
+      
       setStage('results');
       setIsProcessing(false);
       
@@ -183,6 +200,13 @@ export default function UploadPage() {
       console.log('Conclusion to be saved:', data.Conclusion);
       console.log('Keywords to be saved:', data.Keywords);
   setStage('results');
+      
+      // Set PDF title and upload date
+      setPdfTitle(docTitle);
+      const currentDate = new Date();
+      const formattedDate = `Uploaded on ${currentDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`;
+      setUploadDate(formattedDate);
+      
       // 3. Save document to Supabase
       const { data: docData, error: docError } = await createDocument({
         user_id: user.id,
@@ -277,6 +301,8 @@ export default function UploadPage() {
         summaryResult={summaryResult}
         documentId={currentDocumentId}
         userId={user?.id ?? null}
+        pdfTitle={pdfTitle}
+        uploadDate={uploadDate}
       />
 
       {/* Floating Chat Toggle Button - Always show in results stage */}
