@@ -2,7 +2,8 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabaseClient';
+import { createClient } from '@/utils/supabase/client';
+const supabase = createClient();
 import { Upload, FileText, LogOut, Clock, Search, Moon, Sun, History } from 'lucide-react';
 
 type UploadHistoryItem = {

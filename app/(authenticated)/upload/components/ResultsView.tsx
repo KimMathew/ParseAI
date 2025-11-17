@@ -1,7 +1,8 @@
 "use client";
 
 import React from 'react';
-import { supabase } from '@/lib/supabaseClient';
+import { createClient } from '@/utils/supabase/client';
+const supabase = createClient();
 import { Download } from 'lucide-react';
 import ChatSidebar from '@/components/Chat';
 
