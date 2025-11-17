@@ -30,10 +30,6 @@ export default function ScrollStackCard({
 
     const card = cardRef.current;
     const container = containerRef.current;
-    // Get the first glow element specifically (the main background glow)
-    const glowElement = card.querySelector<HTMLElement>(
-      ".scroll-stack-glow"
-    ) || undefined;
 
     // Create scroll stack animation
     const cleanup = createScrollStackAnimation({
@@ -41,7 +37,6 @@ export default function ScrollStackCard({
       containerElement: container,
       stepNumber,
       totalSteps,
-      glowElement,
     });
 
     return cleanup;
@@ -56,25 +51,16 @@ export default function ScrollStackCard({
           transformOrigin: "center bottom",
         }}
       >
-        {/* Glow background - static blur for better performance */}
+        {/* Glow background - simplified for better performance */}
         <div
           aria-hidden
-          className="scroll-stack-glow absolute inset-1 rounded-2xl blur-lg opacity-25 transition-all duration-300 group-hover:opacity-100"
+          className="scroll-stack-glow absolute inset-1 rounded-2xl blur-xl opacity-40 pointer-events-none"
           style={{ backgroundColor: glowColor }}
-        />
-
-        {/* Decorative border accent */}
-        <div
-          aria-hidden
-          className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-          style={{
-            border: `1.5px solid ${glowColor}`,
-          }}
         />
 
         {/* Card content */}
         <div
-          className="relative z-10 rounded-2xl overflow-hidden p-6 md:p-8 transition-all duration-300 ease-out transform-gpu hover:scale-105 hover:-translate-y-1 focus:outline-none focus:ring-4 cursor-pointer h-full flex flex-col justify-between"
+          className="relative z-10 rounded-2xl overflow-hidden p-6 md:p-8 transition-all duration-200 ease-out hover:scale-[1.02] focus:outline-none focus:ring-2 cursor-pointer h-full flex flex-col justify-between"
           style={cardStyle}
           tabIndex={0}
           role="article"
@@ -82,47 +68,21 @@ export default function ScrollStackCard({
           {/* Top section with step badge and icon */}
           <div className="flex items-start justify-between gap-4 mb-3">
             <div className="relative shrink-0">
-              {/* Outer glow ring for better visibility */}
-              <div
-                className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-md"
-                style={{
-                  backgroundColor: glowColor,
-                  transform: "scale(1.15)",
-                }}
-              />
-              
-              {/* Inner shadow ring for depth */}
-              <div
-                className="absolute inset-0 rounded-2xl opacity-40 group-hover:opacity-60 transition-opacity duration-300"
-                style={{
-                  boxShadow: `inset 0 1px 3px rgba(0,0,0,0.3), 0 0 30px ${glowColor}60`,
-                }}
-              />
-              
               {/* Main badge container */}
               <div
-                className="relative w-16 h-16 rounded-2xl flex items-center justify-center font-bold text-2xl transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12 shadow-2xl"
+                className="relative w-16 h-16 rounded-2xl flex items-center justify-center font-bold text-2xl transition-transform duration-200 group-hover:scale-110 shadow-lg"
                 style={{
                   backgroundColor: glowColor,
                   color: '#FFFFFF',
-                  border: `3px solid rgba(255,255,255,0.9)`,
-                  boxShadow: `0 8px 32px ${glowColor}60, 0 0 30px ${glowColor}40, inset 0 1px 0 rgba(255,255,255,0.3)`,
-                  background: `linear-gradient(135deg, ${glowColor}ee 0%, ${glowColor}dd 100%)`,
+                  border: `2px solid rgba(255,255,255,0.2)`,
+                  boxShadow: `0 4px 20px ${glowColor}50`,
                 }}
               >
                 {stepNumber}
-                
-                {/* Subtle shine effect */}
-                <div
-                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-40 transition-opacity duration-300"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 60%)',
-                  }}
-                />
               </div>
             </div>
             {icon && (
-              <div className="text-3xl opacity-40 group-hover:opacity-60 transition-opacity duration-300 mt-1">
+              <div className="text-3xl opacity-40 transition-opacity duration-200 mt-1">
                 {icon}
               </div>
             )}
@@ -142,8 +102,8 @@ export default function ScrollStackCard({
 
           {/* Bottom accent line */}
           <div
-            className="mt-4 h-1 w-12 rounded-full transition-all duration-300 group-hover:w-20"
-            style={{ backgroundColor: glowColor, opacity: 0.6 }}
+            className="mt-4 h-1 w-16 rounded-full"
+            style={{ backgroundColor: glowColor, opacity: 0.5 }}
           />
         </div>
       </div>

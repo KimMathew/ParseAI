@@ -23,71 +23,32 @@ export function createScrollStackAnimation({
     glowElement,
 }: ScrollStackAnimationConfig): () => void {
     // Stagger timing based on step position
-    const staggerDelay = stepNumber * 0.15;
-    const startPercentage = 60 + stepNumber * 15;
-    const endPercentage = 40 + stepNumber * 15;
+    const staggerDelay = stepNumber * 0.1;
+    const startPercentage = 70;
 
-    // Main card animation - fade in and slide up
-    const timeline = gsap.timeline({
-        scrollTrigger: {
-            trigger: containerElement,
-            start: `top ${startPercentage}%`,
-            end: `top ${endPercentage}%`,
-            scrub: 1, // Increased from 0.6 for smoother, less jittery animation
-            markers: false,
+    // Main card animation - fade in and slide up (plays once)
+    gsap.fromTo(
+        element,
+        {
+            opacity: 0,
+            y: 60,
+            scale: 0.9,
         },
-    });
-
-    timeline
-        .fromTo(
-            element,
-            {
-                opacity: 0,
-                y: 80,
-                scale: 0.85,
-                rotate: stepNumber > 1 ? stepNumber * 1.5 : 0,
+        {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.6,
+            ease: "power2.out",
+            delay: staggerDelay,
+            scrollTrigger: {
+                trigger: containerElement,
+                start: `top ${startPercentage}%`,
+                toggleActions: "play none none none",
+                markers: false,
             },
-            {
-                opacity: 1,
-                y: 0,
-                scale: 1,
-                rotate: stepNumber > 1 ? stepNumber * 0.5 : 0,
-                duration: 1,
-                ease: "power3.out",
-            },
-            0
-        )
-        .to(
-            element,
-            {
-                x: stepNumber * 6,
-                duration: 0.8,
-                ease: "power2.out",
-            },
-            0
-        );
-
-    // Animate glow intensity if provided (optimized - removed blur animation)
-    if (glowElement) {
-        gsap.fromTo(
-            glowElement,
-            {
-                opacity: 0.4,
-            },
-            {
-                opacity: 0.9,
-                duration: 1,
-                ease: "power2.out",
-                scrollTrigger: {
-                    trigger: containerElement,
-                    start: `top ${startPercentage}%`,
-                    end: `top ${endPercentage}%`,
-                    scrub: 1, // Matched with main animation for consistency
-                    markers: false,
-                },
-            }
-        );
-    }
+        }
+    );
 
     // Return cleanup function
     return () => {
