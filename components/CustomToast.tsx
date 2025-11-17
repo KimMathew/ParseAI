@@ -59,7 +59,7 @@ export default function CustomToast({
         }
       `}</style>
 
-      <div className="relative p-4 flex items-start gap-3">
+      <div className="relative p-4 flex items-center gap-3">
         {/* Icon */}
         <div className="shrink-0">
           <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
@@ -68,12 +68,12 @@ export default function CustomToast({
         </div>
 
         {/* Content */}
-        <div className="flex-1 min-w-0 pt-0.5">
-          <h4 className="text-white font-semibold text-sm mb-1 leading-tight">
+        <div className="flex-1 min-w-0">
+          <h4 className="text-white font-semibold text-sm leading-tight">
             {title}
           </h4>
           {description && (
-            <p className="text-white/90 text-xs leading-relaxed">
+            <p className="text-white/90 text-xs leading-relaxed mt-1">
               {description}
             </p>
           )}

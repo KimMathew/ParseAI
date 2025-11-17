@@ -87,7 +87,7 @@ export default function UploadPage() {
   // Backend integration for summarization
   const handleSummarize = async () => {
     // TOGGLE THIS TO USE MOCK DATA (true = mock, false = real backend)
-    const USE_MOCK_DATA = false;
+    const USE_MOCK_DATA = true;
     
     setError(null);
     setSummaryResult(null);
