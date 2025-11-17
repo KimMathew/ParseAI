@@ -82,7 +82,7 @@ export default function AnimatedBackground({ isDarkMode }: AnimatedBackgroundPro
         
         {/* Small Blue-Violet Orb - Left Edge Middle */}
         <div 
-          className="absolute top-[45%] left-[5%] w-[320px] h-[320px] rounded-full blur-3xl opacity-40"
+          className="absolute top-[45%] left-[5%] w-[320px] h-80 rounded-full blur-3xl opacity-40"
           style={{
             background: isDarkMode
               ? 'radial-gradient(circle, rgba(99, 102, 241, 0.22) 0%, rgba(139, 92, 246, 0.12) 40%, transparent 70%)'
@@ -94,7 +94,7 @@ export default function AnimatedBackground({ isDarkMode }: AnimatedBackgroundPro
         
         {/* Small Purple Accent - Right Edge Middle */}
         <div 
-          className="absolute top-[55%] right-[5%] w-[320px] h-[320px] rounded-full blur-3xl opacity-40"
+          className="absolute top-[55%] right-[5%] w-[320px] h-80 rounded-full blur-3xl opacity-40"
           style={{
             background: isDarkMode
               ? 'radial-gradient(circle, rgba(147, 51, 234, 0.22) 0%, rgba(126, 34, 206, 0.12) 40%, transparent 70%)'
