@@ -51,6 +51,27 @@ function LayoutWrapper({ children, historyRefreshKey, onHistoryRefresh }: { chil
     fetchUser();
   }, []);
 
+  // Helper function to format timestamp
+  const formatTimestamp = (dateString: string) => {
+    const uploadDate = new Date(dateString);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    // Reset time to midnight for comparison
+    const uploadDateMidnight = new Date(uploadDate.getFullYear(), uploadDate.getMonth(), uploadDate.getDate());
+    const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const yesterdayMidnight = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate());
+    
+    if (uploadDateMidnight.getTime() === todayMidnight.getTime()) {
+      return 'Today';
+    } else if (uploadDateMidnight.getTime() === yesterdayMidnight.getTime()) {
+      return 'Yesterday';
+    } else {
+      return uploadDate.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' });
+    }
+  };
+
   // Fetch upload history for this user
   const fetchHistory = async () => {
     if (!user?.id) return;
@@ -70,7 +91,8 @@ function LayoutWrapper({ children, historyRefreshKey, onHistoryRefresh }: { chil
         id: doc.id,
         title: doc.title,
         type: doc.file_type || 'text',
-        timestamp: new Date(doc.created_at).toLocaleString(),
+        timestamp: formatTimestamp(doc.created_at),
+        created_at: doc.created_at,
         preview: summary?.keywords || summary?.abstract_summary || 'No preview',
         summaryResult,
         file_url: doc.file_url,
