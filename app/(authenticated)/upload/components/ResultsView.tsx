@@ -1,6 +1,8 @@
 "use client";
 
 import React from 'react';
+import { createClient } from '@/utils/supabase/client';
+const supabase = createClient();
 import { Download } from 'lucide-react';
 import ChatSidebar from '@/components/Chat';
 
@@ -27,6 +29,51 @@ export default function ResultsView({
   pdfTitle,
   uploadDate,
 }: ResultsViewProps) {
+  // Download PDF logic
+  const handleDownload = async () => {
+    if (!documentId) return;
+    // Fetch document record from Supabase
+    const { data, error } = await supabase
+      .from('documents')
+      .select('file_url, file_type, title')
+      .eq('id', documentId)
+      .single();
+    if (error || !data?.file_url) {
+      alert('Could not find file for this document.');
+      return;
+    }
+    // Fix: Supabase public URL must be /storage/v1/object/public/<bucket>/<path>
+    // If file_url already includes the bucket, remove it
+    // Use Supabase's getPublicUrl (if bucket is public) or createSignedUrl (if not)
+    // Always use signed URL for private bucket
+    const filePath = data.file_url;
+    const { data: signedData, error: signedError } = await supabase.storage.from('documents').createSignedUrl(filePath, 120);
+    if (signedData?.signedUrl) {
+      try {
+        const response = await fetch(signedData.signedUrl);
+        if (!response.ok) throw new Error('Failed to fetch file');
+        const blob = await response.blob();
+        const a = document.createElement('a');
+        a.href = window.URL.createObjectURL(blob);
+        let filename = 'document.pdf';
+        if (data.title) {
+          filename = data.title.match(/\.pdf$/i) ? data.title : `${data.title}.pdf`;
+        }
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          window.URL.revokeObjectURL(a.href);
+          document.body.removeChild(a);
+        }, 100);
+      } catch (err) {
+        alert('Failed to download file.');
+      }
+    } else {
+      alert('Could not generate a download link.');
+    }
+  };
+
   return (
     <>
       <div className="max-w-5xl mx-auto w-full">
@@ -42,7 +89,7 @@ export default function ResultsView({
               </p>
             </div>
             <div className="flex gap-2 shrink-0">
-              <button className={`p-1.5 sm:p-2 ${theme.hoverBg} rounded-lg transition-colors cursor-pointer`} title="Download">
+              <button className={`p-1.5 sm:p-2 ${theme.hoverBg} rounded-lg transition-colors cursor-pointer`} title="Download" onClick={handleDownload}>
                 <Download className={`w-4 h-4 sm:w-5 sm:h-5 ${theme.textSecondary}`} />
               </button>
             </div>
@@ -56,7 +103,6 @@ export default function ResultsView({
               {/* Main Sections */}
               {['Abstract', 'Introduction', 'Methodology', 'Results', 'Conclusion'].map((section, idx) => {
                 if (!summaryResult[section]) return null;
-                
                 const gradients = [
                   'linear-gradient(135deg, rgba(99,102,241,0.8) 0%, rgba(78,70,197,0.8) 60%, rgba(45,42,120,1) 100%)',
                   'linear-gradient(160deg, rgba(34,211,238,0.8) 0%, rgba(24,170,190,0.8) 60%, rgba(8,120,130,1) 100%)',
@@ -64,7 +110,6 @@ export default function ResultsView({
                   'linear-gradient(135deg, rgba(99,102,241,0.8) 0%, rgba(78,70,197,0.8) 60%, rgba(45,42,120,1) 100%)',
                   'linear-gradient(135deg, rgba(99,102,241,0.8) 0%, rgba(78,70,197,0.8) 60%, rgba(45,42,120,1) 100%)'
                 ];
-                
                 return (
                   <div 
                     key={section} 
