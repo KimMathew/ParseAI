@@ -51,7 +51,11 @@ export default function ResultsView({
         const blob = await response.blob();
         const a = document.createElement('a');
         a.href = window.URL.createObjectURL(blob);
-        a.download = data.title ? `${data.title}.pdf` : 'document.pdf';
+        let filename = 'document.pdf';
+        if (data.title) {
+          filename = data.title.match(/\.pdf$/i) ? data.title : `${data.title}.pdf`;
+        }
+        a.download = filename;
         document.body.appendChild(a);
         a.click();
         setTimeout(() => {
