@@ -183,13 +183,13 @@ export default function UploadSidebar({
                 <button
                   key={item.id}
                   onClick={() => onHistoryClick(item)}
-                  className={`w-full text-left p-3 rounded-lg transition-all ${
+                  className={`w-full text-left p-3 rounded-lg transition-all cursor-pointer ${
                     selectedHistory === item.id
                       ? 'bg-linear-to-r from-[#6366F1] to-[#8B5CF6] text-white shadow-lg shadow-[#6366F1]/20'
                       : `${theme.historyItemBg} ${theme.historyItemHover} ${theme.historyItemText} border ${theme.cardBorder}`
                   }`}
                 >
-                  <div className="flex items-start gap-2 mb-1">
+                  <div className="flex items-start gap-2">
                     {item.type === 'pdf' ? (
                       <FileText className={`w-4 h-4 mt-0.5 shrink-0 ${selectedHistory === item.id ? 'text-white' : 'text-[#6366F1]'}`} />
                     ) : (
@@ -199,16 +199,13 @@ export default function UploadSidebar({
                       <p className={`font-medium text-sm truncate ${selectedHistory === item.id ? 'text-white' : theme.text}`}>
                         {item.title}
                       </p>
-                      <p className={`text-xs truncate mt-0.5 ${selectedHistory === item.id ? 'text-white/80' : theme.textTertiary}`}>
-                        {item.preview}
-                      </p>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <Clock className={`w-3 h-3 ${selectedHistory === item.id ? 'text-white/80' : theme.textMuted}`} />
+                        <span className={`text-xs ${selectedHistory === item.id ? 'text-white/80' : theme.textMuted}`}>
+                          {item.timestamp}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-1 ml-6">
-                    <Clock className={`w-3 h-3 ${selectedHistory === item.id ? 'text-white/80' : theme.textMuted}`} />
-                    <span className={`text-xs ${selectedHistory === item.id ? 'text-white/80' : theme.textMuted}`}>
-                      {item.timestamp}
-                    </span>
                   </div>
                 </button>
               ))}

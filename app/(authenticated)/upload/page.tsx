@@ -35,7 +35,7 @@ export default function UploadPage() {
       setCurrentDocumentId(selectedHistoryItem.id);
       setPdfTitle(selectedHistoryItem.title);
       // Format timestamp to show only date
-      const date = new Date(selectedHistoryItem.timestamp);
+      const date = new Date(selectedHistoryItem.created_at);
       const formattedDate = `Uploaded on ${date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`;
       setUploadDate(formattedDate);
       setStage('results');
