@@ -9,11 +9,23 @@ import Sidebar from '@/components/Sidebar';
 import AnimatedBackground from './upload/components/AnimatedBackground';
 import { supabase } from '@/lib/supabaseClient';
 import { getDocumentsByUser, getSummaryByDocumentId } from '@/lib/supabaseApi';
+import { HistoryProvider, useHistory } from './HistoryContext';
+import { ThemeProvider, useTheme } from './ThemeContext';
 
 export default function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <ThemeProvider>
+      <HistoryProvider>
+        <LayoutWrapper>{children}</LayoutWrapper>
+      </HistoryProvider>
+    </ThemeProvider>
+  );
+}
+
+function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedHistory, setSelectedHistory] = useState<number | null>(null);
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const { isDarkMode, toggleTheme } = useTheme();
   const [user, setUser] = useState<any>(null);
   const [uploadHistory, setUploadHistory] = useState<any[]>([]);
 
@@ -46,6 +58,7 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
         Abstract: summary.abstract_summary,
         Introduction: summary.introduction_summary,
         Methodology: summary.methodology_summary,
+        Results: summary.results_summary,
         Conclusion: summary.conclusion_summary,
         Keywords: summary.keywords,
       } : null;
@@ -84,22 +97,66 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
 
   const handleHistoryClick = (item: any) => {
     setSelectedHistory(item.id);
-    // Close sidebar on mobile after selection
+    // Pass the full item data including summaryResult to children via context
+    // This will be handled by HistoryProvider wrapper
     if (window.innerWidth < 1024) {
       setSidebarOpen(false);
     }
-    // You'll need to pass this data to child pages via context or URL params
   };
 
   const handleNewUpload = () => {
     setSelectedHistory(null);
-    // Close sidebar on mobile when starting new upload
+    // Clear the history item in context to trigger upload view
+    // This will be handled by LayoutContent wrapper
     if (window.innerWidth < 1024) {
       setSidebarOpen(false);
     }
   };
 
   const theme = getTheme(isDarkMode);
+
+  return (
+    <LayoutContent 
+      sidebarOpen={sidebarOpen}
+      setSidebarOpen={setSidebarOpen}
+      selectedHistory={selectedHistory}
+      isDarkMode={isDarkMode}
+      onThemeToggle={toggleTheme}
+      user={user}
+      uploadHistory={uploadHistory}
+      handleHistoryClick={handleHistoryClick}
+      handleNewUpload={handleNewUpload}
+      theme={theme}
+    >
+      {children}
+    </LayoutContent>
+  );
+}
+
+function LayoutContent({ 
+  children, 
+  sidebarOpen, 
+  setSidebarOpen, 
+  selectedHistory, 
+  isDarkMode, 
+  onThemeToggle, 
+  user, 
+  uploadHistory, 
+  handleHistoryClick, 
+  handleNewUpload, 
+  theme 
+}: any) {
+  const { setSelectedHistoryItem } = useHistory();
+
+  const onHistoryClick = (item: any) => {
+    handleHistoryClick(item);
+    setSelectedHistoryItem(item); // Pass full item to context
+  };
+
+  const onNewUpload = () => {
+    handleNewUpload();
+    setSelectedHistoryItem(null); // Clear context to show upload view
+  };
 
   return (
     <>
@@ -121,10 +178,10 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
           theme={theme}
           user={user ?? { name: '', email: '', avatar: 'U' }}
           uploadHistory={uploadHistory}
-          onHistoryClick={handleHistoryClick}
-          onNewUpload={handleNewUpload}
+          onHistoryClick={onHistoryClick}
+          onNewUpload={onNewUpload}
           isCollapsed={!sidebarOpen}
-          onThemeToggle={() => setIsDarkMode(!isDarkMode)}
+          onThemeToggle={onThemeToggle}
         />
 
         {/* Main Content Area */}

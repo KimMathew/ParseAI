@@ -8,19 +8,41 @@ import CustomToast from '@/components/CustomToast';
 import UploadContent from './components/UploadContent';
 import { supabase } from '@/lib/supabaseClient';
 import { getDocumentsByUser, getSummaryByDocumentId, createDocument, createSummary, uploadFileToStorage } from '@/lib/supabaseApi';
+import { useHistory } from '../HistoryContext';
+import { useTheme } from '../ThemeContext';
 
 export default function UploadPage() {
+  const { selectedHistoryItem } = useHistory();
+  const { isDarkMode } = useTheme();
   const [stage, setStage] = useState('upload');
   const [uploadMethod, setUploadMethod] = useState('file');
   const [isProcessing, setIsProcessing] = useState(false);
   const [showChat, setShowChat] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(true);
   const [file, setFile] = useState<File | null>(null);
   const [text, setText] = useState<string>("");
   const [summaryResult, setSummaryResult] = useState<any>(null);
   const [currentDocumentId, setCurrentDocumentId] = useState<string | number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
+
+  // Load selected history item from context
+  React.useEffect(() => {
+    if (selectedHistoryItem) {
+      // Load history item - show results
+      setSummaryResult(selectedHistoryItem.summaryResult);
+      setCurrentDocumentId(selectedHistoryItem.id);
+      setStage('results');
+      setShowChat(false);
+    } else if (selectedHistoryItem === null) {
+      // New upload clicked - reset to upload view
+      setStage('upload');
+      setSummaryResult(null);
+      setCurrentDocumentId(null);
+      setShowChat(false);
+      setFile(null);
+      setText('');
+    }
+  }, [selectedHistoryItem]);
 
   // Fetch user from Supabase auth
   React.useEffect(() => {
@@ -56,7 +78,7 @@ export default function UploadPage() {
   // Backend integration for summarization
   const handleSummarize = async () => {
     // TOGGLE THIS TO USE MOCK DATA (true = mock, false = real backend)
-    const USE_MOCK_DATA = true;
+    const USE_MOCK_DATA = false;
     
     setError(null);
     setSummaryResult(null);
