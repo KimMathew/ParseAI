@@ -88,7 +88,7 @@ export default function UploadPage({ onHistoryRefresh }: { onHistoryRefresh?: ()
   // Backend integration for summarization
   const handleSummarize = async () => {
     // TOGGLE THIS TO USE MOCK DATA (true = mock, false = real backend)
-    const USE_MOCK_DATA = true;
+    const USE_MOCK_DATA = false;
     
     setError(null);
     setSummaryResult(null);
@@ -194,6 +194,7 @@ export default function UploadPage({ onHistoryRefresh }: { onHistoryRefresh?: ()
       }
       const data = await res.json();
   setSummaryResult(data);
+ 
       console.log('Abstract to be saved:', data.Abstract);
       console.log('Introduction to be saved:', data.Introduction);
       console.log('Methodology to be saved:', data.Methodology);
@@ -203,7 +204,7 @@ export default function UploadPage({ onHistoryRefresh }: { onHistoryRefresh?: ()
   setStage('results');
       
       // Set PDF title and upload date
-      setPdfTitle(docTitle);
+      setPdfTitle(data.Title || docTitle);
       const currentDate = new Date();
       const formattedDate = `Uploaded on ${currentDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`;
       setUploadDate(formattedDate);
@@ -211,7 +212,7 @@ export default function UploadPage({ onHistoryRefresh }: { onHistoryRefresh?: ()
       // 3. Save document to Supabase
       const { data: docData, error: docError } = await createDocument({
         user_id: user.id,
-        title: docTitle,
+        title: data.Title || docTitle,
         file_url: file_url || '',
         file_type,
         original_text: file ? undefined : text,
@@ -241,6 +242,7 @@ export default function UploadPage({ onHistoryRefresh }: { onHistoryRefresh?: ()
         results_summary: data.Results || '',
         conclusion_summary: data.Conclusion || '',
         keywords: data.Keywords || '',
+        definitions: data.Definitions || '',
       }) || {};
       if (summaryError) {
         // eslint-disable-next-line no-console

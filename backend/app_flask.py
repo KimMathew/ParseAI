@@ -55,14 +55,15 @@ def summarize_document_with_kmeans_clustering(file, llm, embeddings):
     try:
         result = filter.transform_documents(documents=texts)
         full_text = "\n".join([doc.page_content for doc in result])
-        key_sections = ["Abstract", "Introduction", "Methodology", "Results", "Conclusion"]
+        key_sections = ["Title", "Abstract", "Introduction", "Methodology", "Results", "Conclusion"]
         prompt = (
             f"This is the text:\n{full_text}"
             "For the research paper text above, extract and summarize ONLY the following sections: "
-            "Abstract, Introduction, Methodology, Results, Conclusion. "
+            "Title, Abstract, Introduction, Methodology, Results, Conclusion. "
             "If a section is not present, do NOT mention it at all. Don't include any other sections. "
             "For each section found, output the section name as a markdown heading with double asterisks (e.g., **Section**) followed by its summary as a single paragraph. "
             "Do NOT use bullet points, numbered lists, or any introductory comments. Use simple words to explain the content to a non-IT person. "
+            "When extracting the Title, make sure to get the actual title of the paper as it appears in the text. Just the title and nothing else. "
             
         )
         print("[DEBUG] LLM Prompt:\n", prompt[:1000], "..." if len(prompt) > 1000 else "")
@@ -93,10 +94,14 @@ def summarize_document_with_kmeans_clustering(file, llm, embeddings):
             # 1. Try to extract stated keywords from the text
             keyword_pattern = re.compile(r"keywords?\s*[:\-]\s*(.+?)(?:\n|$)", re.IGNORECASE)
             keyword_match = keyword_pattern.search(full_text)
+            keywords = []
             if keyword_match:
                 # Use the stated keywords (split by comma or semicolon)
                 stated_keywords = keyword_match.group(1)
-                keywords = [k.strip() for k in re.split(r",|;", stated_keywords) if k.strip()]
+                for k in re.split(r",|;", stated_keywords):
+                    k = k.strip()
+                    if k and k.lower() not in [kw.lower() for kw in keywords]:
+                        keywords.append(k)
                 summaries["Keywords"] = ", ".join(keywords)
             else:
                 # 2. Use KeyBERT to extract keywords from the text
@@ -105,10 +110,35 @@ def summarize_document_with_kmeans_clustering(file, llm, embeddings):
                     text_for_kw = full_text[:2000] if len(full_text) > 2000 else full_text
                     kw_model = KeyBERT()
                     keybert_keywords = kw_model.extract_keywords(text_for_kw, keyphrase_ngram_range=(1, 2), stop_words='english', top_n=8)
-                    keywords = [kw for kw, score in keybert_keywords]
+                    for kw, score in keybert_keywords:
+                        if kw and kw.lower() not in [k.lower() for k in keywords]:
+                            keywords.append(kw)
                     summaries["Keywords"] = ", ".join(keywords)
                 except Exception as e:
                     summaries["Keywords"] = f"Error extracting keywords: {str(e)}"
+
+            # --- Keyword Definitions via LLM ---
+            if keywords:
+                definition_prompt = (
+                    f"Keywords: {', '.join(keywords)}"
+                    "For each of the following keywords, provide a simple, one-sentence definition suitable for a non-technical reader. "
+                    "Format your response as:\n**Keyword**: Definition\n"
+                    "Do not talk to the user. "
+                )
+                try:
+                    def_response = llm.invoke(definition_prompt)
+                    if hasattr(def_response, 'content'):
+                        def_response = def_response.content
+                    # Parse definitions
+                    definitions = {}
+                    for line in def_response.splitlines():
+                        match = re.match(r"\*\*(.+?)\*\*[:：]\s*(.+)", line)
+                        if match:
+                            kw, definition = match.groups()
+                            definitions[kw.strip()] = definition.strip()
+                    summaries["Definitions"] = definitions
+                except Exception as e:
+                    summaries["Definitions"] = {}
         except Exception as e:
             print("[ERROR] LLM invocation failed:\n", e)
             summaries = {"error": f"Error extracting sections: {str(e)}"}

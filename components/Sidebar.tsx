@@ -49,7 +49,8 @@ export default function UploadSidebar({
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push('/');
+    // Use replace to prevent going back to authenticated pages
+    window.location.replace('/');
   };
 
   return (

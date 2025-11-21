@@ -215,70 +215,83 @@ export default function ResultsView({
                 );
               })}
 
-              {/* Keywords Section */}
-              {summaryResult["Keywords"] && (
-                <div 
-                  className={`${theme.cardBg} ${isDarkMode ? 'backdrop-blur-xl' : ''} rounded-xl shadow-lg p-4 sm:p-6 transition-all duration-300 hover:-translate-y-1 relative`}
-                  style={{ border: '1px solid rgba(255, 255, 255, 0.08)' }}
-                >
-                  <div className="flex items-start justify-between mb-4 gap-2">
-                    <h4 className={`text-base sm:text-lg font-bold flex items-center gap-2 ${theme.text}`}>
-                      <span 
-                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-white border border-white/30"
-                        style={{ background: 'linear-gradient(160deg, rgba(251,191,36,0.8) 0%, rgba(217,119,6,0.8) 60%, rgba(161,98,7,1) 100%)' }}
-                      >
-                        <Lightbulb className="w-4 h-4 sm:w-5 sm:h-5" />
-                      </span>
-                      Keywords
-                    </h4>
-                    <button
-                      onClick={() => copyToClipboard(summaryResult["Keywords"], "Keywords")}
-                      className={`p-1.5 rounded-lg transition-all ${theme.hoverBg} shrink-0 cursor-pointer`}
-                      title="Copy to clipboard"
-                    >
-                      {copiedSection === "Keywords" ? (
-                        <CheckCircle2 className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <Copy className="w-4 h-4 text-gray-400 hover:text-gray-300" />
-                      )}
-                    </button>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {summaryResult["Keywords"].split(/[,\n]+/).map((keyword, idx) => {
-                      const trimmedKeyword = keyword.trim();
-                      if (!trimmedKeyword) return null;
-                      return (
-                        <span 
-                          key={idx}
-                          className="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-full border transition-colors"
-                          style={{ 
-                            backgroundColor: 'rgba(251, 191, 36, 0.1)',
-                            borderColor: 'rgba(251, 191, 36, 0.4)',
-                            color: isDarkMode ? '#FCD34D' : '#D97706'
-                          }}
-                        >
-                          {trimmedKeyword}
-                        </span>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
+              {/* Keyword Definitions Section */}
+              {summaryResult["Definitions"] && typeof summaryResult["Definitions"] === 'object' && Object.keys(summaryResult["Definitions"]).length > 0 && (() => {
+                const definitionsText = Object.entries(summaryResult["Definitions"])
+                  .map(([kw, def]) => `${kw}: ${def}`)
+                  .join('\n\n');
+                const { text: displayText, isTruncated } = truncateText(definitionsText, 400);
+                const isExpanded = expandedSections["Definitions"];
 
-              {/* Other Sections */}
-              {Object.keys(summaryResult)
-                .filter((section) => !['Abstract', 'Introduction', 'Methodology', 'Results', 'Conclusion', 'Keywords'].includes(section))
-                .map((section) => (
+                return (
                   <div 
-                    key={section} 
-                    className="rounded-xl shadow-lg p-4 sm:p-6 transition-transform duration-300 hover:-translate-y-1 bg-white/10"
+                    className={`${theme.cardBg} ${isDarkMode ? 'backdrop-blur-xl' : ''} rounded-xl shadow-lg p-4 sm:p-6 transition-all duration-300 hover:-translate-y-1 relative`}
+                    style={{ border: '1px solid rgba(255, 255, 255, 0.08)' }}
                   >
-                    <h4 className="text-base sm:text-lg font-bold text-blue-700 mb-2">{section}</h4>
-                    <p className="text-white/90 leading-relaxed text-sm sm:text-base text-justify">
-                      {summaryResult[section]}
-                    </p>
+                    <div className="flex items-start justify-between mb-4 gap-2">
+                      <h4 className={`text-base sm:text-lg font-bold flex items-center gap-2 ${theme.text}`}>
+                        <span 
+                          className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-white border border-white/30"
+                          style={{ background: 'linear-gradient(160deg, rgba(251,191,36,0.8) 0%, rgba(217,119,6,0.8) 60%, rgba(161,98,7,1) 100%)' }}
+                        >
+                          <Lightbulb className="w-4 h-4 sm:w-5 sm:h-5" />
+                        </span>
+                        Keyword Definitions
+                      </h4>
+                      <button
+                        onClick={() => copyToClipboard(JSON.stringify(summaryResult["Definitions"], null, 2), "Definitions")}
+                        className={`p-1.5 rounded-lg transition-all ${theme.hoverBg} shrink-0 cursor-pointer`}
+                        title="Copy to clipboard"
+                      >
+                        {copiedSection === "Definitions" ? (
+                          <CheckCircle2 className="w-4 h-4 text-green-500" />
+                        ) : (
+                          <Copy className="w-4 h-4 text-gray-400 hover:text-gray-300" />
+                        )}
+                      </button>
+                    </div>
+                    <div className="flex flex-col gap-3">
+                      {Object.entries(summaryResult["Definitions"])
+                        .slice(0, isExpanded || !isTruncated ? undefined : 2)
+                        .map(([keyword, definition]) => (
+                          <div key={keyword} className="flex flex-col gap-1.5">
+                            <span 
+                              className="inline-block px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-full border transition-colors w-fit"
+                              style={{ 
+                                backgroundColor: 'rgba(251, 191, 36, 0.15)',
+                                borderColor: 'rgba(251, 191, 36, 0.4)',
+                                color: isDarkMode ? '#FCD34D' : '#D97706'
+                              }}
+                            >
+                              {keyword}
+                            </span>
+                            <p className={`text-sm leading-relaxed ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                              {String(definition)}
+                            </p>
+                          </div>
+                        ))}
+                    </div>
+                    {Object.keys(summaryResult["Definitions"]).length > 2 && (
+                      <button
+                        onClick={() => toggleSection("Definitions")}
+                        className={`mt-3 flex items-center gap-1 text-sm font-medium transition-colors cursor-pointer ${
+                          isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'
+                        }`}
+                      >
+                        {isExpanded ? (
+                          <>
+                            Show Less <ChevronUp className="w-4 h-4" />
+                          </>
+                        ) : (
+                          <>
+                            Show More <ChevronDown className="w-4 h-4" />
+                          </>
+                        )}
+                      </button>
+                    )}
                   </div>
-                ))}
+                );
+              })()}
             </>
           ) : (
             <div className="text-center text-white/70 py-8">No summary available.</div>
