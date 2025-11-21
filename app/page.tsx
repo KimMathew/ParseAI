@@ -41,7 +41,7 @@ export default function Home() {
               <div className="text-center">
               <p className="inline-block px-4 py-1 rounded-full bg-white/6 text-sm mb-6 border border-white/10 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]">✨ Instant AI Research Summarization →</p>
               <h1 className="text-4xl md:text-6xl font-extrabold max-w-3xl mx-auto leading-tight"> Understand any research paper — instantly.</h1>
-              <p className="mt-6 text-white/70 max-w-2xl mx-auto">Upload a PDF or paste text. Get structured summaries, keywords, and plain-English explanations powered by PARSe AI.</p>
+              <p className="mt-6 text-white/70 max-w-2xl mx-auto">Stop drowning in jargon. Transform dense PDFs into structured summaries and clear, simplified insights in seconds.</p>
 
               <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
                 <a
@@ -108,7 +108,7 @@ export default function Home() {
                 boxShadow: '0 36px 80px rgba(99,102,241,0.16), inset 0 1px 0 rgba(255,255,255,0.03)'
               }}
               title="Understand any paper in seconds"
-              description="PARSe AI instantly extracts the Abstract, Methods, Results, and Conclusion of any research paper — turning dense studies into clear, structured insights you can digest fast."
+              description="Instantly extract the core logic—Abstract, Methods, and Results. Turn dense academic PDFs into structured, scannable insights."
             />
 
             {/* Right small card - uses second aurora color */}
@@ -119,8 +119,8 @@ export default function Home() {
                 background: 'linear-gradient(160deg, rgba(34,211,238,0.8) 0%, rgba(24,170,190,0.8) 60%, rgba(8,120,130,1) 100%)',
                 boxShadow: '0 36px 80px rgba(34,211,238,0.14), inset 0 1px 0 rgba(255,255,255,0.03)'
               }}
-              title="Plain‑English Summaries"
-              description="Automatically simplify jargon and explain complex ideas for quick understanding."
+              title="Jargon-free explanations"
+              description="Don't get stuck on technical terms. Automatically translate complex methodologies into clear, plain-English summaries."
             />
 
             {/* Bottom full-width card - uses third aurora color */}
@@ -131,8 +131,8 @@ export default function Home() {
                 background: 'linear-gradient(135deg, rgba(139,92,246,0.8) 0%, rgba(105,70,200,0.8) 60%, rgba(70,42,160,1) 100%)',
                 boxShadow: '0 36px 80px rgba(139,92,246,0.16), inset 0 1px 0 rgba(255,255,255,0.03)'
               }}
-              title="Chat with your paper like a real expert"
-              description="Once logged in, start an AI-powered chat that lets you ask follow-up questions, clarify concepts, or explore related ideas — directly based on the paper's content."
+              title="Chat with your documents"
+              description="Go beyond passive reading. Turn your document into an active research partner. Whether you need to clarify complex methodologies, locate specific citations, or challenge the author's arguments, simply ask detailed follow-up questions to get instant, context-aware answers."
             />
           </div>
           </div>
@@ -150,7 +150,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="w-full relative space-y-6">
+          <div className="w-full relative grid grid-cols-1 md:grid-cols-3 gap-6">
             <ScrollStackCard
               stepNumber={1}
               totalSteps={3}
@@ -160,9 +160,8 @@ export default function Home() {
                 boxShadow: '0 36px 80px rgba(99,102,241,0.16), inset 0 1px 0 rgba(255,255,255,0.03)'
               }}
               title="Upload Your Research"
-              description="Easily upload a PDF or paste your research paper text directly into PARSe AI. Our system accepts multiple formats and handles files of any length."
+              description="Drag and drop any PDF. Whether it’s a short abstract or a 100-page thesis, our system processes files of any length instantly."
             />
-
             <ScrollStackCard
               stepNumber={2}
               totalSteps={3}
@@ -171,10 +170,9 @@ export default function Home() {
                 background: 'linear-gradient(160deg, rgba(34,211,238,0.8) 0%, rgba(24,170,190,0.8) 60%, rgba(8,120,130,1) 100%)',
                 boxShadow: '0 36px 80px rgba(34,211,238,0.14), inset 0 1px 0 rgba(255,255,255,0.03)'
               }}
-              title="AI Analyzes in Seconds"
-              description="Our advanced AI engine instantly processes your paper, extracting key findings, methodologies, and results. Powered by state-of-the-art language models."
+              title="Instant Analysis"
+              description="Powered by Ollama AI, our engine instantly deconstructs the paper—identifying methodologies, isolating results, and extracting key findings with precision."
             />
-
             <ScrollStackCard
               stepNumber={3}
               totalSteps={3}
@@ -183,8 +181,8 @@ export default function Home() {
                 background: 'linear-gradient(135deg, rgba(139,92,246,0.8) 0%, rgba(105,70,200,0.8) 60%, rgba(70,42,160,1) 100%)',
                 boxShadow: '0 36px 80px rgba(139,92,246,0.16), inset 0 1px 0 rgba(255,255,255,0.03)'
               }}
-              title="Get Clear Insights"
-              description="Receive a beautifully formatted summary with key takeaways, plain-English explanations, and the ability to chat with an AI expert about the paper."
+              title="Unlock Clear Insights"
+              description="Get more than just text. Receive a structured summary, jargon-free explanations, and the ability to chat with your paper to clarify complex points."
             />
           </div>
         </div>
