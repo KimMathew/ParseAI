@@ -242,7 +242,7 @@ export default function UploadPage({ onHistoryRefresh }: { onHistoryRefresh?: ()
         results_summary: data.Results || '',
         conclusion_summary: data.Conclusion || '',
         keywords: data.Keywords || '',
-        definitions: data.Definitions || '',
+        definitions: JSON.stringify(data.Definitions || {}),
       }) || {};
       if (summaryError) {
         // eslint-disable-next-line no-console
