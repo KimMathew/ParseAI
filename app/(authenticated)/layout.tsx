@@ -120,6 +120,16 @@ function LayoutWrapper({ children, historyRefreshKey, onHistoryRefresh }: { chil
     if (error) return;
     const items = await Promise.all((docs || []).map(async (doc: any) => {
       const { data: summary } = await getSummaryByDocumentId(doc.id);
+      let parsedDefinitions = null;
+      if (summary?.definitions) {
+        try {
+          parsedDefinitions = typeof summary.definitions === 'string' 
+            ? JSON.parse(summary.definitions) 
+            : summary.definitions;
+        } catch (e) {
+          console.error('Failed to parse definitions:', e);
+        }
+      }
       const summaryResult = summary ? {
         Abstract: summary.abstract_summary,
         Introduction: summary.introduction_summary,
@@ -127,6 +137,7 @@ function LayoutWrapper({ children, historyRefreshKey, onHistoryRefresh }: { chil
         Results: summary.results_summary,
         Conclusion: summary.conclusion_summary,
         Keywords: summary.keywords,
+        Definitions: parsedDefinitions,
       } : null;
       return {
         id: doc.id,
