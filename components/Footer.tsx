@@ -16,7 +16,7 @@ export default function Footer() {
                 height={32}
                 className="rounded-lg"
               />
-              <span className="font-bold text-lg">PARSe AI</span>
+              <span className="font-bold text-lg">PARSeAI</span>
             </div>
             <p className="text-white/50 text-sm">
               Instantly understand research papers with AI-powered summaries.

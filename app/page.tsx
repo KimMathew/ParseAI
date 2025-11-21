@@ -7,6 +7,7 @@ import FeatureCard from "../components/FeatureCard";
 import ScrollStackCard from "../components/ScrollStackCard";
 import Footer from "../components/Footer";
 import SectionBackground from "../components/SectionBackground";
+import HeroVisual from "../components/HeroVisual";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "@/lib/route";
 
@@ -38,7 +39,7 @@ export default function Home() {
           <div ref={heroRef} className="relative z-20 max-w-5xl mx-auto px-6 pt-28">
             <div className="rounded-xl px-6 py-20">
               <div className="text-center">
-              <p className="inline-block px-4 py-1 rounded-full bg-white/6 text-sm mb-6">Instant AI research summarization</p>
+              <p className="inline-block px-4 py-1 rounded-full bg-white/6 text-sm mb-6 border border-white/10 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]">✨ Instant AI Research Summarization →</p>
               <h1 className="text-4xl md:text-6xl font-extrabold max-w-3xl mx-auto leading-tight"> Understand any research paper — instantly.</h1>
               <p className="mt-6 text-white/70 max-w-2xl mx-auto">Upload a PDF or paste text. Get structured summaries, keywords, and plain-English explanations powered by PARSe AI.</p>
 
@@ -62,6 +63,9 @@ export default function Home() {
                   Explore Features
                 </a>
               </div>
+
+              {/* Hero Visual - Show the product output */}
+              <HeroVisual />
             </div>
           </div>
         </div>
