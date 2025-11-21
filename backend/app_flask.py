@@ -7,12 +7,10 @@ env_local_path = pathlib.Path(__file__).parent.parent / '.env.local'
 env_path = pathlib.Path(__file__).parent.parent / '.env'
 if env_local_path.exists():
     load_dotenv(dotenv_path=env_local_path)
-    print(f"[DEBUG] Loaded .env.local from: {env_local_path}")
+    print(f"[DEBUG] Loaded .env.local.")
 else:
     load_dotenv(dotenv_path=env_path)
-    print(f"[DEBUG] Loaded .env from: {env_path}")
-print(f"[DEBUG] SUPABASE_URL: {os.environ.get('NEXT_PUBLIC_SUPABASE_URL')}")
-print(f"[DEBUG] SUPABASE_SERVICE_KEY: {os.environ.get('NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY')}")
+    print(f"[DEBUG] Loaded .env.")
 from langchain_ollama import ChatOllama
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader

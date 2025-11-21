@@ -4,7 +4,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import InputField from "@/components/InputField";
-import { supabase } from "@/lib/supabaseClient";
+import { createClient } from '@/utils/supabase/client';
+const supabase = createClient();
 
 export default function Signin() {
   const [email, setEmail] = useState("");

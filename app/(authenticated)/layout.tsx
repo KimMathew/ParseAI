@@ -7,22 +7,27 @@ import { getTheme } from '@/lib/theme';
 import CustomToast from '@/components/CustomToast';
 import Sidebar from '@/components/Sidebar';
 import AnimatedBackground from './upload/components/AnimatedBackground';
-import { supabase } from '@/lib/supabaseClient';
+import { createClient } from '@/utils/supabase/client';
+const supabase = createClient();
 import { getDocumentsByUser, getSummaryByDocumentId } from '@/lib/supabaseApi';
 import { HistoryProvider, useHistory } from './HistoryContext';
 import { ThemeProvider, useTheme } from './ThemeContext';
 
+
 export default function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   return (
     <ThemeProvider>
       <HistoryProvider>
-        <LayoutWrapper>{children}</LayoutWrapper>
+        <LayoutWrapper historyRefreshKey={historyRefreshKey} onHistoryRefresh={() => setHistoryRefreshKey(k => k + 1)}>
+          {children}
+        </LayoutWrapper>
       </HistoryProvider>
     </ThemeProvider>
   );
 }
 
-function LayoutWrapper({ children }: { children: React.ReactNode }) {
+function LayoutWrapper({ children, historyRefreshKey, onHistoryRefresh }: { children: React.ReactNode, historyRefreshKey: number, onHistoryRefresh: () => void }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedHistory, setSelectedHistory] = useState<number | null>(null);
   const { isDarkMode, toggleTheme } = useTheme();
@@ -100,7 +105,7 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     fetchHistory();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
+  }, [user?.id, historyRefreshKey]);
 
   // Set sidebar open by default on desktop
   useEffect(() => {
@@ -149,6 +154,7 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
       handleHistoryClick={handleHistoryClick}
       handleNewUpload={handleNewUpload}
       theme={theme}
+      onHistoryRefresh={onHistoryRefresh}
     >
       {children}
     </LayoutContent>
@@ -166,7 +172,8 @@ function LayoutContent({
   uploadHistory, 
   handleHistoryClick, 
   handleNewUpload, 
-  theme 
+  theme, 
+  onHistoryRefresh
 }: any) {
   const { setSelectedHistoryItem } = useHistory();
 
@@ -180,6 +187,7 @@ function LayoutContent({
     setSelectedHistoryItem(null); // Clear context to show upload view
   };
 
+  // Pass onHistoryRefresh to children via context or props
   return (
     <>
       <Toaster 

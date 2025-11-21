@@ -6,12 +6,13 @@ import { toast } from 'sonner';
 import { getTheme } from '@/lib/theme';
 import CustomToast from '@/components/CustomToast';
 import UploadContent from './components/UploadContent';
-import { supabase } from '@/lib/supabaseClient';
+import { createClient } from '@/utils/supabase/client';
+const supabase = createClient();
 import { getDocumentsByUser, getSummaryByDocumentId, createDocument, createSummary, uploadFileToStorage } from '@/lib/supabaseApi';
 import { useHistory } from '../HistoryContext';
 import { useTheme } from '../ThemeContext';
 
-export default function UploadPage() {
+export default function UploadPage({ onHistoryRefresh }: { onHistoryRefresh?: () => void }) {
   const { selectedHistoryItem } = useHistory();
   const { isDarkMode } = useTheme();
   const [stage, setStage] = useState('upload');
@@ -264,7 +265,8 @@ export default function UploadPage() {
           isDarkMode={isDarkMode}
         />
       ), { duration: 4000 });
-      // After setSelectedHistory(document.id);
+      // Refresh upload history in sidebar
+      if (onHistoryRefresh) onHistoryRefresh();
     } catch (err: any) {
       toast.custom((t) => (
         <CustomToast
