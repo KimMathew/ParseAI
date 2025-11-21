@@ -43,14 +43,23 @@ export default function Signup() {
         setIsLoading(false);
         return;
       }
+      // Set SSR session cookies if session exists
+      if (data.session) {
+        await fetch('/api/auth/callback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            access_token: data.session.access_token,
+            refresh_token: data.session.refresh_token,
+          }),
+        });
+      }
       const { error: userError } = await createUser({ id: userId, name, email });
       if (userError) {
         setError(userError.message || "Failed to create user profile.");
         setIsLoading(false);
         return;
       }
-      // Optionally redirect or show success
-      // window.location.href = "/signin";
       setIsLoading(false);
       alert("Account created! Please check your email to verify.");
     } catch (err: any) {

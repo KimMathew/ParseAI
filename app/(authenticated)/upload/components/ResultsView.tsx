@@ -176,6 +176,7 @@ export default function ResultsView({
           onClose={() => onShowChat(false)}
           documentId={documentId ?? null}
           userId={userId ?? null}
+          uploadDate={uploadDate}
         />
       )}
     </>

@@ -3,6 +3,77 @@
 import React from 'react';
 import { MessageSquare } from 'lucide-react';
 
+// Typing indicator component
+const TypingIndicator = ({ isDarkMode, theme }: { isDarkMode: boolean; theme: any }) => (
+  <div className="flex items-start gap-2">
+    <div className="w-8 h-8 bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] rounded-full flex items-center justify-center flex-shrink-0">
+      <MessageSquare className="w-4 h-4 text-white" />
+    </div>
+    <div className={`${isDarkMode ? 'bg-gray-700' : 'bg-slate-100'} rounded-2xl rounded-tl-none p-3`}>
+      <div className="flex gap-1 items-center h-5">
+        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+      </div>
+    </div>
+  </div>
+);
+
+// Format message text with markdown-like formatting
+const FormattedMessage = ({ text, className }: { text: string; className: string }) => {
+  // Split by double newlines for paragraphs
+  const paragraphs = text.split(/\n\n+/);
+  
+  const formatText = (str: string) => {
+    // Replace **text** with bold
+    const parts = str.split(/(\*\*.*?\*\*)/g);
+    return parts.map((part, index) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return <strong key={index}>{part.slice(2, -2)}</strong>;
+      }
+      // Replace single newlines with <br />
+      return part.split('\n').map((line, i, arr) => (
+        <React.Fragment key={`${index}-${i}`}>
+          {line}
+          {i < arr.length - 1 && <br />}
+        </React.Fragment>
+      ));
+    });
+  };
+
+  const formatParagraph = (paragraph: string) => {
+    // Check if paragraph contains bullet points
+    const lines = paragraph.split('\n');
+    const isBulletList = lines.some(line => line.trim().match(/^\*\s+/));
+    
+    if (isBulletList) {
+      return (
+        <ul className="list-disc list-inside space-y-1">
+          {lines.map((line, i) => {
+            const bulletMatch = line.trim().match(/^\*\s+(.+)$/);
+            if (bulletMatch) {
+              return <li key={i}>{formatText(bulletMatch[1])}</li>;
+            }
+            return line.trim() ? <div key={i}>{formatText(line)}</div> : null;
+          })}
+        </ul>
+      );
+    }
+    
+    return <>{formatText(paragraph)}</>;
+  };
+
+  return (
+    <div className={className}>
+      {paragraphs.map((paragraph, index) => (
+        <div key={index} className={index > 0 ? 'mt-3' : ''}>
+          {formatParagraph(paragraph)}
+        </div>
+      ))}
+    </div>
+  );
+};
+
 
 type ChatMessage = {
   id: string;
@@ -19,6 +90,7 @@ type ChatSidebarProps = {
   onClose: () => void;
   documentId: string | number | null;
   userId: string | null;
+  uploadDate?: string;
 };
 
 
@@ -30,6 +102,7 @@ export default function ChatSidebar({
   onClose,
   documentId,
   userId,
+  uploadDate,
 }: ChatSidebarProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -57,8 +130,13 @@ export default function ChatSidebar({
 
   const handleSend = async () => {
     if (!input.trim() || !documentId || !userId) return;
+    
+    const questionToSend = input.trim();
+    // Clear input immediately for better UX
+    setInput('');
     setLoading(true);
     setError(null);
+    
     // Optimistically add user question
     const tempId = 'temp-' + Date.now();
     setMessages(prev => [
@@ -68,7 +146,7 @@ export default function ChatSidebar({
         created_at: new Date().toISOString(),
         user_id: userId,
         document_id: String(documentId),
-        question: input,
+        question: questionToSend,
         answer: '',
       },
     ]);
@@ -76,7 +154,7 @@ export default function ChatSidebar({
       const res = await fetch('http://127.0.0.1:8000/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId, document_id: documentId, question: input }),
+        body: JSON.stringify({ user_id: userId, document_id: documentId, question: questionToSend }),
       });
       const data = await res.json();
       if (!res.ok || !data.answer) throw new Error(data.error || 'No answer');
@@ -84,7 +162,6 @@ export default function ChatSidebar({
       setMessages(prev => prev.map(m =>
         m.id === tempId ? { ...m, answer: data.answer } : m
       ));
-      setInput('');
     } catch (e: any) {
       setError(e.message || 'Failed to send message.');
       // Remove temp message
@@ -114,24 +191,42 @@ export default function ChatSidebar({
 
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3">
-          <div className={`${isDarkMode ? 'bg-gray-700' : 'bg-slate-100'} rounded-lg p-3 border ${theme.cardBorder}`}>
-            <p className={`text-xs sm:text-sm ${theme.textSecondary}`}>
-              👋 Hi! I've analyzed your paper. Ask me anything about the methodology, results, or any specific section.
-            </p>
-          </div>
-          {messages.map((msg, idx) => (
-            <div key={msg.id} className={`rounded-lg p-3 border ${theme.cardBorder} ${msg.user_id === userId ? (isDarkMode ? 'bg-gray-700' : 'bg-[#6366F1]/10') : (isDarkMode ? 'bg-gray-700' : 'bg-slate-100')}`}>
-              <div className="mb-1">
-                <span className={`font-semibold text-xs ${theme.text}`}>{msg.user_id === userId ? 'You' : 'AI'}</span>
-                <span className="ml-2 text-xs text-gray-400">{new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-              </div>
-              <div className={`text-xs sm:text-sm ${theme.text}`}>{msg.question}</div>
-              {msg.answer && (
-                <div className={`mt-2 text-xs sm:text-sm ${theme.textSecondary} border-t pt-2 ${isDarkMode ? 'border-gray-600' : 'border-slate-200'}`}>
-                  {msg.answer}
-                </div>
-              )}
+          {/* Welcome Message */}
+          <div className="flex items-start gap-2">
+            <div className="w-8 h-8 bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] rounded-full flex items-center justify-center flex-shrink-0">
+              <MessageSquare className="w-4 h-4 text-white" />
             </div>
+            <div className={`${isDarkMode ? 'bg-gray-700' : 'bg-slate-100'} rounded-2xl rounded-tl-none p-3 max-w-[80%]`}>
+              <p className={`text-xs sm:text-sm ${theme.text}`}>
+                👋 Hi! I've analyzed your paper. Ask me anything about the methodology, results, or any specific section.
+              </p>
+            </div>
+          </div>
+
+          {/* Chat Messages */}
+          {messages.map((msg) => (
+            <React.Fragment key={msg.id}>
+              {/* User Message */}
+              <div className="flex items-start gap-2 justify-end">
+                <div className="bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] rounded-2xl rounded-tr-none p-3 max-w-[80%]">
+                  <p className="text-xs sm:text-sm text-white">{msg.question}</p>
+                </div>
+              </div>
+
+              {/* AI Response or Loading Indicator */}
+              {msg.answer ? (
+                <div className="flex items-start gap-2">
+                  <div className="w-8 h-8 bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] rounded-full flex items-center justify-center flex-shrink-0">
+                    <MessageSquare className="w-4 h-4 text-white" />
+                  </div>
+                  <div className={`${isDarkMode ? 'bg-gray-700' : 'bg-slate-100'} rounded-2xl rounded-tl-none p-3 max-w-[80%]`}>
+                    <FormattedMessage text={msg.answer} className={`text-xs sm:text-sm ${theme.text}`} />
+                  </div>
+                </div>
+              ) : (
+                <TypingIndicator isDarkMode={isDarkMode} theme={theme} />
+              )}
+            </React.Fragment>
           ))}
           <div ref={messagesEndRef} />
         </div>
