@@ -128,7 +128,7 @@ export default function UploadForm({
             {uploadMethod === 'file' ? (
               <div>
                 <label
-                  className={`border-2 border-dashed ${theme.uploadBorder} rounded-xl p-6 sm:p-8 md:p-12 text-center ${!file ? `${theme.uploadHoverBorder} ${theme.uploadHoverBg} cursor-pointer` : ''} transition-all flex flex-col items-center justify-center min-h-[260px] sm:min-h-[300px] md:min-h-80`}
+                  className={`border-2 border-dashed ${theme.uploadBorder} rounded-xl p-6 text-center ${!file ? `${theme.uploadHoverBorder} ${theme.uploadHoverBg} cursor-pointer` : ''} transition-all flex flex-col items-center justify-center min-h-[220px] sm:min-h-60 md:min-h-[260px]`}
                   htmlFor="file-upload-input"
                 >
                   {!file ? (
@@ -226,7 +226,7 @@ export default function UploadForm({
                 <div className="relative">
                   <textarea
                     placeholder="Paste your research paper text here..."
-                    className={`w-full min-h-[230px] sm:min-h-[270px] md:min-h-[290px] p-3 sm:p-4 ${text ? 'pb-12' : ''} ${theme.inputBg} border ${theme.inputBorder} rounded-xl focus:ring-2 focus:ring-[#6366F1] focus:border-transparent resize-none text-sm sm:text-base ${theme.inputText} ${theme.inputPlaceholder}`}
+                    className={`w-full min-h-[188px] sm:min-h-52 md:min-h-[228px] p-3 sm:p-4 ${text ? 'pb-12' : ''} ${theme.inputBg} border ${theme.inputBorder} rounded-xl focus:ring-2 focus:ring-[#6366F1] focus:border-transparent resize-none text-sm sm:text-base ${theme.inputText} ${theme.inputPlaceholder}`}
                     value={text}
                     onChange={onTextChange}
                   />
