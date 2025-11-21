@@ -16,6 +16,32 @@ import { ThemeProvider, useTheme } from './ThemeContext';
 
 export default function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
+  
+  // Prevent page caching to fix back button issue after logout
+  useEffect(() => {
+    // Add meta tags to prevent caching
+    const metaCache = document.createElement('meta');
+    metaCache.httpEquiv = 'Cache-Control';
+    metaCache.content = 'no-store, no-cache, must-revalidate, proxy-revalidate';
+    document.head.appendChild(metaCache);
+
+    const metaPragma = document.createElement('meta');
+    metaPragma.httpEquiv = 'Pragma';
+    metaPragma.content = 'no-cache';
+    document.head.appendChild(metaPragma);
+
+    const metaExpires = document.createElement('meta');
+    metaExpires.httpEquiv = 'Expires';
+    metaExpires.content = '0';
+    document.head.appendChild(metaExpires);
+
+    return () => {
+      document.head.removeChild(metaCache);
+      document.head.removeChild(metaPragma);
+      document.head.removeChild(metaExpires);
+    };
+  }, []);
+  
   return (
     <ThemeProvider>
       <HistoryProvider>
@@ -47,9 +73,23 @@ function LayoutWrapper({ children, historyRefreshKey, onHistoryRefresh }: { chil
           email: data.user.email,
           avatar,
         });
+      } else {
+        // No user found - redirect to signin
+        window.location.replace('/signin');
       }
     };
     fetchUser();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        window.location.replace('/signin');
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Helper function to format timestamp
