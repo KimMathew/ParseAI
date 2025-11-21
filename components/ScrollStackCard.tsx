@@ -43,13 +43,11 @@ export default function ScrollStackCard({
   }, [stepNumber, totalSteps]);
 
   return (
-    <div ref={containerRef} className="relative w-full h-72">
+    <div ref={containerRef} className="relative w-full h-full flex">
       <div
         ref={cardRef}
-        className="absolute inset-0 group"
-        style={{
-          transformOrigin: "center bottom",
-        }}
+        className="relative group flex-1 flex flex-col"
+        style={{ transformOrigin: "center bottom" }}
       >
         {/* Glow background - simplified for better performance */}
         <div
@@ -60,17 +58,17 @@ export default function ScrollStackCard({
 
         {/* Card content */}
         <div
-          className="relative z-10 rounded-2xl overflow-hidden p-6 md:p-8 transition-all duration-200 ease-out hover:scale-[1.02] focus:outline-none focus:ring-2 cursor-pointer h-full flex flex-col justify-between"
+          className="relative z-10 rounded-2xl overflow-hidden p-6 md:p-8 transition-all duration-200 ease-out hover:scale-[1.02] focus:outline-none focus:ring-2 cursor-pointer flex flex-col justify-between h-full min-h-[220px]"
           style={cardStyle}
           tabIndex={0}
           role="article"
         >
           {/* Top section with step badge and icon */}
-          <div className="flex items-start justify-between gap-4 mb-3">
+          <div className="flex items-start justify-between gap-4 mb-4">
             <div className="relative shrink-0">
               {/* Main badge container */}
               <div
-                className="relative w-16 h-16 rounded-2xl flex items-center justify-center font-bold text-2xl transition-transform duration-200 group-hover:scale-110 shadow-lg"
+                className="relative w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-2xl transition-transform duration-200 group-hover:scale-110 shadow-lg"
                 style={{
                   backgroundColor: glowColor,
                   color: '#FFFFFF',
@@ -96,7 +94,7 @@ export default function ScrollStackCard({
           </div>
 
           {/* Description */}
-          <p className="text-sm md:text-base text-white/80 leading-relaxed line-clamp-3 grow">
+          <p className="text-sm md:text-base text-white/80 leading-relaxed grow">
             {description}
           </p>
 
