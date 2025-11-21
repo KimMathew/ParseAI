@@ -33,9 +33,9 @@ export async function getDocumentById(id: string) {
 }
 
 // SUMMARIES TABLE
-export async function createSummary({ document_id, abstract_summary, introduction_summary, methodology_summary, results_summary, conclusion_summary, keywords }: { document_id: string, abstract_summary: string, introduction_summary: string, methodology_summary: string, results_summary: string, conclusion_summary: string, keywords: string }) {
+export async function createSummary({ document_id, abstract_summary, introduction_summary, methodology_summary, results_summary, conclusion_summary, keywords, definitions }: { document_id: string, abstract_summary: string, introduction_summary: string, methodology_summary: string, results_summary: string, conclusion_summary: string, keywords: string, definitions: string, }) {
   const supabase = createClient();
-  return await supabase.from('summaries').insert([{ document_id, abstract_summary, introduction_summary, methodology_summary, results_summary, conclusion_summary, keywords }]);
+  return await supabase.from('summaries').insert([{ document_id, abstract_summary, introduction_summary, methodology_summary, results_summary, conclusion_summary, keywords, definitions }]);
 }
 
 export async function getSummaryByDocumentId(document_id: string) {

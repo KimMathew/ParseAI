@@ -129,38 +129,23 @@ export default function ResultsView({
                 );
               })}
 
-              {/* Keywords Section */}
-              {summaryResult["Keywords"] && (
-                <div 
-                  className="rounded-xl shadow-lg p-4 sm:p-6 transition-transform duration-300 hover:-translate-y-1"
-                  style={{ background: 'linear-gradient(160deg, rgba(34,211,238,0.8) 0%, rgba(24,170,190,0.8) 60%, rgba(8,120,130,1) 100%)' }}
-                >
+              {/* Keyword Definitions Section */}
+              {summaryResult["Definitions"] && Object.keys(summaryResult["Definitions"]).length > 0 && (
+                <div className="rounded-xl shadow-lg p-4 sm:p-6 transition-transform duration-300 hover:-translate-y-1"
+                  style={{ background: 'linear-gradient(120deg, #6366F1 0%, #22D3EE 100%)' }}>
                   <h4 className="text-base sm:text-lg font-bold text-white mb-2 sm:mb-3 flex items-center gap-2">
                     <span className="w-7 h-7 sm:w-8 sm:h-8 bg-white/20 text-white rounded-lg flex items-center justify-center text-sm font-bold border border-white/30">
-                      ★
+                      ℹ️
                     </span>
-                    Keywords
+                    Keyword Definitions
                   </h4>
-                  <p className="text-white/90 leading-relaxed text-sm sm:text-base whitespace-pre-line text-justify">
-                    {summaryResult["Keywords"]}
-                  </p>
+                  <ul className="text-white/90 leading-relaxed text-sm sm:text-base list-disc pl-5">
+                    {Object.entries(summaryResult["Definitions"]).map(([kw, def]) => (
+                      <li key={kw}><strong>{kw}:</strong> {def}</li>
+                    ))}
+                  </ul>
                 </div>
               )}
-
-              {/* Other Sections */}
-              {Object.keys(summaryResult)
-                .filter((section) => !['Abstract', 'Introduction', 'Methodology', 'Results', 'Conclusion', 'Keywords'].includes(section))
-                .map((section) => (
-                  <div 
-                    key={section} 
-                    className="rounded-xl shadow-lg p-4 sm:p-6 transition-transform duration-300 hover:-translate-y-1 bg-white/10"
-                  >
-                    <h4 className="text-base sm:text-lg font-bold text-blue-700 mb-2">{section}</h4>
-                    <p className="text-white/90 leading-relaxed text-sm sm:text-base text-justify">
-                      {summaryResult[section]}
-                    </p>
-                  </div>
-                ))}
             </>
           ) : (
             <div className="text-center text-white/70 py-8">No summary available.</div>
