@@ -3,7 +3,7 @@
 import React from 'react';
 import { createClient } from '@/utils/supabase/client';
 const supabase = createClient();
-import { Download, Lightbulb, FileText, Beaker, BarChart3, CheckCircle2, BookOpen, Copy, ChevronDown, ChevronUp } from 'lucide-react';
+import { Download, Trash, Lightbulb, FileText, Beaker, BarChart3, CheckCircle2, BookOpen, Copy, ChevronDown, ChevronUp } from 'lucide-react';
 import ChatSidebar from '@/components/Chat';
 
 type ResultsViewProps = {
@@ -104,6 +104,12 @@ export default function ResultsView({
     }
   };
 
+  // Placeholder for delete logic
+  const handleDelete = () => {
+    // TODO: Implement delete functionality
+    alert('Delete action triggered (placeholder)');
+  };
+
   return (
     <>
       <div className="max-w-5xl mx-auto w-full">
@@ -126,6 +132,15 @@ export default function ResultsView({
             <div className="flex gap-2 shrink-0">
               <button className={`p-1.5 sm:p-2 ${theme.hoverBg} rounded-lg transition-colors cursor-pointer`} title="Download" onClick={handleDownload}>
                 <Download className={`w-4 h-4 sm:w-5 sm:h-5 ${theme.textSecondary}`} />
+              </button>
+              <button
+                className={`group p-1.5 sm:p-2 ${theme.hoverBg} rounded-lg transition-colors cursor-pointer`}
+                title="Delete"
+                onClick={handleDelete}
+              >
+                <Trash
+                  className={`w-4 h-4 sm:w-5 sm:h-5 ${theme.textSecondary} group-hover:text-red-500`}
+                />
               </button>
             </div>
           </div>
