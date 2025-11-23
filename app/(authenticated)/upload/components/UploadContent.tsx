@@ -14,6 +14,7 @@ type UploadContentProps = {
   onUploadMethodChange: (method: string) => void;
   onSummarize: () => void;
   onShowChat: (show: boolean) => void;
+  onDelete: () => void;
   file: File | null;
   text: string;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -47,6 +48,7 @@ export default function UploadContent(props: UploadContentProps) {
           isDarkMode={props.isDarkMode}
           theme={props.theme}
           onShowChat={props.onShowChat}
+          onDelete={props.onDelete}
           summaryResult={props.summaryResult}
           documentId={props.documentId}
           userId={props.userId}

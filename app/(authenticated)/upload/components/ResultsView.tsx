@@ -11,6 +11,7 @@ type ResultsViewProps = {
   isDarkMode: boolean;
   theme: any;
   onShowChat: (show: boolean) => void;
+  onDelete: () => void;
   summaryResult: Record<string, string> | null;
   documentId?: string | number | null;
   userId?: string | null;
@@ -23,6 +24,7 @@ export default function ResultsView({
   isDarkMode,
   theme,
   onShowChat,
+  onDelete,
   summaryResult,
   documentId,
   userId,
@@ -31,6 +33,7 @@ export default function ResultsView({
 }: ResultsViewProps) {
   const [expandedSections, setExpandedSections] = React.useState<Record<string, boolean>>({});
   const [copiedSection, setCopiedSection] = React.useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = React.useState(false);
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({
@@ -104,10 +107,18 @@ export default function ResultsView({
     }
   };
 
-  // Placeholder for delete logic
+  // Delete handler - delegates to parent component
   const handleDelete = () => {
-    // TODO: Implement delete functionality
-    alert('Delete action triggered (placeholder)');
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = () => {
+    setShowDeleteModal(false);
+    onDelete();
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
   };
 
   return (
@@ -324,6 +335,45 @@ export default function ResultsView({
           userId={userId ?? null}
           uploadDate={uploadDate}
         />
+      )}
+      
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div 
+            className={`${theme.cardBg} ${isDarkMode ? 'backdrop-blur-xl' : ''} rounded-2xl shadow-2xl p-6 max-w-md w-full border animate-in zoom-in-95 duration-200`}
+            style={{ border: '1px solid rgba(255, 255, 255, 0.08)' }}
+          >
+            <div className="flex flex-col items-center gap-4 mb-6">
+              <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center">
+                <Trash className="w-8 h-8 text-red-500" />
+              </div>
+              <div>
+                <h3 className={`text-xl font-bold ${theme.text} mb-2`}>
+                  Delete Document
+                </h3>
+                <p className={`text-sm ${theme.textSecondary} leading-relaxed`}>
+                  Are you sure you want to delete "<span className="font-semibold">{pdfTitle || 'this document'}</span>"? This action cannot be undone and will permanently delete the document, its summary, and all associated chat history.
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={cancelDelete}
+                className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-colors ${theme.hoverBg} ${theme.text} cursor-pointer`}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-6 py-2.5 rounded-lg text-sm font-medium bg-red-500 hover:bg-red-600 text-white transition-colors cursor-pointer"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );
