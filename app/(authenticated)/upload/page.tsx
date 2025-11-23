@@ -8,12 +8,12 @@ import CustomToast from '@/components/CustomToast';
 import UploadContent from './components/UploadContent';
 import { createClient } from '@/utils/supabase/client';
 const supabase = createClient();
-import { getDocumentsByUser, getSummaryByDocumentId, createDocument, createSummary, uploadFileToStorage } from '@/lib/supabaseApi';
+import { getDocumentsByUser, getSummaryByDocumentId, createDocument, createSummary, uploadFileToStorage, deleteDocument, deleteChatByDocumentId, deleteSummaryByDocumentId, deleteFileFromStorage } from '@/lib/supabaseApi';
 import { useHistory } from '../HistoryContext';
 import { useTheme } from '../ThemeContext';
 
 export default function UploadPage({ onHistoryRefresh }: { onHistoryRefresh?: () => void }) {
-  const { selectedHistoryItem } = useHistory();
+  const { selectedHistoryItem, setSelectedHistoryItem, refreshHistory } = useHistory();
   const { isDarkMode } = useTheme();
   const [stage, setStage] = useState('upload');
   const [uploadMethod, setUploadMethod] = useState('file');
@@ -83,6 +83,75 @@ export default function UploadPage({ onHistoryRefresh }: { onHistoryRefresh?: ()
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setText(e.target.value);
     if (e.target.value) setFile(null);
+  };
+
+  // Handle document deletion
+  const handleDelete = async () => {
+    if (!currentDocumentId) return;
+
+    const confirmed = confirm('Are you sure you want to delete this document? This action cannot be undone.');
+    if (!confirmed) return;
+
+    try {
+      // Get document details to find file_url
+      const { data: doc, error: docError } = await supabase
+        .from('documents')
+        .select('file_url')
+        .eq('id', currentDocumentId)
+        .single();
+
+      if (docError) throw docError;
+
+      // Delete chat first (foreign key constraint)
+      const { error: chatError } = await deleteChatByDocumentId(String(currentDocumentId));
+      if (chatError) throw chatError;
+
+      // Delete summary first (foreign key constraint)
+      const { error: summaryError } = await deleteSummaryByDocumentId(String(currentDocumentId));
+      if (summaryError) throw summaryError;
+
+      // Delete document record
+      const { error: deleteError } = await deleteDocument(String(currentDocumentId));
+      if (deleteError) throw deleteError;
+
+      // Delete file from storage if exists
+      if (doc?.file_url) {
+        const { error: storageError } = await deleteFileFromStorage(doc.file_url);
+        if (storageError) console.error('Storage deletion error:', storageError);
+      }
+
+      // Success - navigate back to upload view
+      setSelectedHistoryItem(null);
+      setStage('upload');
+      setSummaryResult(null);
+      setCurrentDocumentId(null);
+      setPdfTitle('');
+      setUploadDate('');
+      setShowChat(false);
+
+      toast.custom((t) => (
+        <CustomToast
+          type="success"
+          title="Document deleted successfully!"
+          onClose={() => toast.dismiss(t)}
+          isDarkMode={isDarkMode}
+        />
+      ), { duration: 4000 });
+
+      // Refresh history sidebar
+      refreshHistory();
+      if (onHistoryRefresh) onHistoryRefresh();
+    } catch (err: any) {
+      toast.custom((t) => (
+        <CustomToast
+          type="error"
+          title="Failed to delete document"
+          onClose={() => toast.dismiss(t)}
+          isDarkMode={isDarkMode}
+        />
+      ), { duration: 5000 });
+      console.error('Delete error:', err);
+    }
   };
 
   // Backend integration for summarization
@@ -268,6 +337,7 @@ export default function UploadPage({ onHistoryRefresh }: { onHistoryRefresh?: ()
         />
       ), { duration: 4000 });
       // Refresh upload history in sidebar
+      refreshHistory();
       if (onHistoryRefresh) onHistoryRefresh();
     } catch (err: any) {
       toast.custom((t) => (
@@ -298,6 +368,7 @@ export default function UploadPage({ onHistoryRefresh }: { onHistoryRefresh?: ()
         onUploadMethodChange={setUploadMethod}
         onSummarize={handleSummarize}
         onShowChat={setShowChat}
+        onDelete={handleDelete}
         file={file}
         text={text}
         onFileChange={handleFileChange}

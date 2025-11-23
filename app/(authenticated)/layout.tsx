@@ -44,7 +44,7 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
   
   return (
     <ThemeProvider>
-      <HistoryProvider>
+      <HistoryProvider onRefresh={() => setHistoryRefreshKey(k => k + 1)}>
         <LayoutWrapper historyRefreshKey={historyRefreshKey} onHistoryRefresh={() => setHistoryRefreshKey(k => k + 1)}>
           {children}
         </LayoutWrapper>

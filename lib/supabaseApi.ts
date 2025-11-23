@@ -32,6 +32,11 @@ export async function getDocumentById(id: string) {
   return await supabase.from('documents').select('*').eq('id', id).single();
 }
 
+export async function deleteDocument(id: string) {
+  const supabase = createClient();
+  return await supabase.from('documents').delete().eq('id', id);
+}
+
 // SUMMARIES TABLE
 export async function createSummary({ document_id, abstract_summary, introduction_summary, methodology_summary, results_summary, conclusion_summary, keywords, definitions }: { document_id: string, abstract_summary: string, introduction_summary: string, methodology_summary: string, results_summary: string, conclusion_summary: string, keywords: string, definitions: string, }) {
   const supabase = createClient();
@@ -43,6 +48,16 @@ export async function getSummaryByDocumentId(document_id: string) {
   return await supabase.from('summaries').select('*').eq('document_id', document_id).single();
 }
 
+export async function deleteSummaryByDocumentId(document_id: string) {
+  const supabase = createClient();
+  return await supabase.from('summaries').delete().eq('document_id', document_id);
+}
+
+export async function deleteChatByDocumentId(document_id: string) {
+  const supabase = createClient();
+  return await supabase.from('chats').delete().eq('document_id', document_id);
+}
+
 // FILE UPLOAD TO SUPABASE STORAGE
 export async function uploadFileToStorage(file: File, path: string) {
   const supabase = createClient();
@@ -52,4 +67,9 @@ export async function uploadFileToStorage(file: File, path: string) {
     console.error('Supabase upload error:', result.error, 'path:', path, 'file:', file);
   }
   return result;
+}
+
+export async function deleteFileFromStorage(path: string) {
+  const supabase = createClient();
+  return await supabase.storage.from('documents').remove([path]);
 }
