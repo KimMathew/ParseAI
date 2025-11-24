@@ -18,6 +18,7 @@ type ResultsViewProps = {
   userId?: string | null;
   pdfTitle?: string;
   uploadDate?: string;
+  sidebarOpen?: boolean;
 };
 
 export default function ResultsView({
@@ -31,10 +32,18 @@ export default function ResultsView({
   userId,
   pdfTitle,
   uploadDate,
+  sidebarOpen = true,
 }: ResultsViewProps) {
   const [expandedSections, setExpandedSections] = React.useState<Record<string, boolean>>({});
   const [copiedSection, setCopiedSection] = React.useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = React.useState(false);
+  const [isDeleting, setIsDeleting] = React.useState(false);
+
+  // Reset delete modal state when document changes
+  React.useEffect(() => {
+    setShowDeleteModal(false);
+    setIsDeleting(false);
+  }, [documentId]);
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({
@@ -113,9 +122,15 @@ export default function ResultsView({
     setShowDeleteModal(true);
   };
 
-  const confirmDelete = () => {
-    setShowDeleteModal(false);
-    onDelete();
+  const confirmDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await onDelete();
+      // Modal will be closed by the parent after successful deletion
+    } catch (error) {
+      // If deletion fails, reset the deleting state
+      setIsDeleting(false);
+    }
   };
 
   const cancelDelete = () => {
@@ -346,6 +361,8 @@ export default function ResultsView({
         pdfTitle={pdfTitle}
         onCancel={cancelDelete}
         onConfirm={confirmDelete}
+        sidebarOpen={sidebarOpen}
+        isDeleting={isDeleting}
       />
     </>
   );

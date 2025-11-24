@@ -12,6 +12,7 @@ const supabase = createClient();
 import { getDocumentsByUser, getSummaryByDocumentId } from '@/lib/supabaseApi';
 import { HistoryProvider, useHistory } from './HistoryContext';
 import { ThemeProvider, useTheme } from './ThemeContext';
+import { SidebarProvider, useSidebar } from './SidebarContext';
 
 
 export default function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
@@ -45,20 +46,23 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
   return (
     <ThemeProvider>
       <HistoryProvider onRefresh={() => setHistoryRefreshKey(k => k + 1)}>
-        <LayoutWrapper historyRefreshKey={historyRefreshKey} onHistoryRefresh={() => setHistoryRefreshKey(k => k + 1)}>
-          {children}
-        </LayoutWrapper>
+        <SidebarProvider>
+          <LayoutWrapper historyRefreshKey={historyRefreshKey} onHistoryRefresh={() => setHistoryRefreshKey(k => k + 1)}>
+            {children}
+          </LayoutWrapper>
+        </SidebarProvider>
       </HistoryProvider>
     </ThemeProvider>
   );
 }
 
 function LayoutWrapper({ children, historyRefreshKey, onHistoryRefresh }: { children: React.ReactNode, historyRefreshKey: number, onHistoryRefresh: () => void }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { sidebarOpen, setSidebarOpen } = useSidebar();
   const [selectedHistory, setSelectedHistory] = useState<number | null>(null);
   const { isDarkMode, toggleTheme } = useTheme();
   const [user, setUser] = useState<any>(null);
   const [uploadHistory, setUploadHistory] = useState<any[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 
   // Fetch user from Supabase auth
   useEffect(() => {
@@ -116,8 +120,12 @@ function LayoutWrapper({ children, historyRefreshKey, onHistoryRefresh }: { chil
   // Fetch upload history for this user
   const fetchHistory = async () => {
     if (!user?.id) return;
+    setIsLoadingHistory(true);
     const { data: docs, error } = await getDocumentsByUser(user.id);
-    if (error) return;
+    if (error) {
+      setIsLoadingHistory(false);
+      return;
+    }
     const items = await Promise.all((docs || []).map(async (doc: any) => {
       const { data: summary } = await getSummaryByDocumentId(doc.id);
       let parsedDefinitions = null;
@@ -151,27 +159,13 @@ function LayoutWrapper({ children, historyRefreshKey, onHistoryRefresh }: { chil
       };
     }));
     setUploadHistory(items);
+    setIsLoadingHistory(false);
   };
 
   useEffect(() => {
     fetchHistory();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, historyRefreshKey]);
-
-  // Set sidebar open by default on desktop
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 1024) {
-        setSidebarOpen(true);
-      } else {
-        setSidebarOpen(false);
-      }
-    };
-    
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   const handleHistoryClick = (item: any) => {
     setSelectedHistory(item.id);
@@ -202,6 +196,7 @@ function LayoutWrapper({ children, historyRefreshKey, onHistoryRefresh }: { chil
       onThemeToggle={toggleTheme}
       user={user}
       uploadHistory={uploadHistory}
+      isLoadingHistory={isLoadingHistory}
       handleHistoryClick={handleHistoryClick}
       handleNewUpload={handleNewUpload}
       theme={theme}
@@ -220,7 +215,8 @@ function LayoutContent({
   isDarkMode, 
   onThemeToggle, 
   user, 
-  uploadHistory, 
+  uploadHistory,
+  isLoadingHistory,
   handleHistoryClick, 
   handleNewUpload, 
   theme, 
@@ -259,6 +255,7 @@ function LayoutContent({
           theme={theme}
           user={user ?? { name: '', email: '', avatar: 'U' }}
           uploadHistory={uploadHistory}
+          isLoadingHistory={isLoadingHistory}
           onHistoryClick={onHistoryClick}
           onNewUpload={onNewUpload}
           isCollapsed={!sidebarOpen}

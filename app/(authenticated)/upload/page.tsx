@@ -11,10 +11,12 @@ const supabase = createClient();
 import { getDocumentsByUser, getSummaryByDocumentId, createDocument, createSummary, uploadFileToStorage, deleteDocument, deleteChatByDocumentId, deleteSummaryByDocumentId, deleteFileFromStorage } from '@/lib/supabaseApi';
 import { useHistory } from '../HistoryContext';
 import { useTheme } from '../ThemeContext';
+import { useSidebar } from '../SidebarContext';
 
 export default function UploadPage({ onHistoryRefresh }: { onHistoryRefresh?: () => void }) {
   const { selectedHistoryItem, setSelectedHistoryItem, refreshHistory } = useHistory();
   const { isDarkMode } = useTheme();
+  const { sidebarOpen } = useSidebar();
   const [stage, setStage] = useState('upload');
   const [uploadMethod, setUploadMethod] = useState('file');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -375,6 +377,7 @@ export default function UploadPage({ onHistoryRefresh }: { onHistoryRefresh?: ()
         userId={user?.id ?? null}
         pdfTitle={pdfTitle}
         uploadDate={uploadDate}
+        sidebarOpen={sidebarOpen}
       />
 
       {/* Floating Chat Toggle Button - Always show in results stage */}

@@ -58,9 +58,6 @@ export default function Signin() {
 
         {/* Login Form */}
         <form onSubmit={handleSignIn} className="space-y-4 mb-6">
-          {error && (
-            <div className="text-red-500 text-sm text-center">{error}</div>
-          )}
           {/* Email Input */}
           <InputField
             id="email"
@@ -81,8 +78,12 @@ export default function Signin() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter your password"
             required
-            helperLink={{ text: "Forgot password?", href: "#" }}
+            helperLink={{ text: "Forgot password?", href: "/password_reset" }}
           />
+
+          {error && (
+            <div className="text-red-500 text-sm">{error}</div>
+          )}
 
           {/* Sign In Button */}
           <button

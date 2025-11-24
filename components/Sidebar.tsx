@@ -29,6 +29,7 @@ type UploadSidebarProps = {
   onNewUpload: () => void;
   onThemeToggle: () => void;
   isCollapsed?: boolean;
+  isLoadingHistory?: boolean;
 };
 
 export default function UploadSidebar({
@@ -42,10 +43,31 @@ export default function UploadSidebar({
   onNewUpload,
   onThemeToggle,
   isCollapsed = false,
+  isLoadingHistory = false,
 }: UploadSidebarProps) {
   const router = useRouter();
   const [showLogoutMenu, setShowLogoutMenu] = React.useState(false);
   const [showHistoryPopover, setShowHistoryPopover] = React.useState(false);
+
+  // Skeleton loader component
+  const HistorySkeleton = () => (
+    <div className="space-y-2">
+      {[1, 2, 3].map((i) => (
+        <div
+          key={i}
+          className={`w-full p-3 rounded-lg border ${theme.cardBorder} ${theme.historyItemBg} animate-pulse`}
+        >
+          <div className="flex items-start gap-2">
+            <div className={`w-4 h-4 mt-0.5 rounded ${isDarkMode ? 'bg-white/10' : 'bg-black/10'}`} />
+            <div className="flex-1 min-w-0 space-y-2">
+              <div className={`h-3.5 ${isDarkMode ? 'bg-white/10' : 'bg-black/10'} rounded w-3/4`} />
+              <div className={`h-3 ${isDarkMode ? 'bg-white/10' : 'bg-black/10'} rounded w-1/2`} />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -74,7 +96,7 @@ export default function UploadSidebar({
           />
           {/* History Panel - appears to the right of sidebar */}
           <div 
-            className={`fixed left-24 top-94 -translate-y-1/2 ${isDarkMode ? 'bg-[#1F2937]' : 'bg-white'} border ${theme.cardBorder} rounded-xl shadow-2xl z-80 w-80 overflow-hidden min-h-[400px]`}
+            className={`fixed left-24 top-94 -translate-y-1/2 ${isDarkMode ? 'bg-[#1F2937]' : 'bg-white'} border ${theme.cardBorder} rounded-xl shadow-2xl z-80 w-80 overflow-hidden h-[400px] flex flex-col`}
           >
             {/* Header */}
             <div className="p-4 border-b border-border">
@@ -88,7 +110,7 @@ export default function UploadSidebar({
               </div>
             </div>
             {/* History List */}
-            <div className="overflow-y-auto max-h-[400px] upload-history-popover-scroll">
+            <div className="flex-1 overflow-y-auto upload-history-popover-scroll">
               <style jsx>{`
                 .upload-history-popover-scroll::-webkit-scrollbar {
                   width: 10px;
@@ -109,7 +131,11 @@ export default function UploadSidebar({
                   scrollbar-color: ${isDarkMode ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)'} transparent;
                 }
               `}</style>
-              {uploadHistory.length === 0 ? (
+              {isLoadingHistory ? (
+                <div className="p-3">
+                  <HistorySkeleton />
+                </div>
+              ) : uploadHistory.length === 0 ? (
                 <div className="p-8 text-center">
                   <FileText className={`w-12 h-12 mx-auto mb-3 ${theme.textMuted} opacity-30`} />
                   <p className={`text-sm ${theme.textMuted}`}>No upload history yet</p>
@@ -271,7 +297,8 @@ export default function UploadSidebar({
 
       {/* Upload History List */}
       {!isCollapsed && (
-        <div className="flex-1 overflow-y-auto min-h-0 upload-history-scroll">
+        <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+        <div className="h-[400px] overflow-y-auto upload-history-scroll">
           <style jsx>{`
             .upload-history-scroll::-webkit-scrollbar {
               width: 14px;
@@ -296,39 +323,50 @@ export default function UploadSidebar({
             <h3 className={`text-xs font-semibold ${theme.textMuted} uppercase tracking-wider mb-3`}>
               Upload History
             </h3>
-            <div className="space-y-2">
-              {uploadHistory.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => onHistoryClick(item)}
-                  className={`w-full text-left p-3 rounded-lg transition-all cursor-pointer ${
-                    selectedHistory === item.id
-                      ? 'bg-linear-to-r from-[#6366F1] to-[#8B5CF6] text-white shadow-lg shadow-[#6366F1]/20'
-                      : `${theme.historyItemBg} ${theme.historyItemHover} ${theme.historyItemText} border ${theme.cardBorder}`
-                  }`}
-                >
-                  <div className="flex items-start gap-2">
-                    {item.type === 'pdf' ? (
-                      <FileText className={`w-4 h-4 mt-0.5 shrink-0 ${selectedHistory === item.id ? 'text-white' : 'text-[#6366F1]'}`} />
-                    ) : (
-                      <FileText className={`w-4 h-4 mt-0.5 shrink-0 ${selectedHistory === item.id ? 'text-white' : 'text-[#22D3EE]'}`} />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className={`font-medium text-sm truncate ${selectedHistory === item.id ? 'text-white' : theme.text}`}>
-                        {item.title}
-                      </p>
-                      <div className="flex items-center gap-1 mt-0.5">
-                        <Clock className={`w-3 h-3 ${selectedHistory === item.id ? 'text-white/80' : theme.textMuted}`} />
-                        <span className={`text-xs ${selectedHistory === item.id ? 'text-white/80' : theme.textMuted}`}>
-                          {item.timestamp}
-                        </span>
+            {isLoadingHistory ? (
+              <HistorySkeleton />
+            ) : uploadHistory.length === 0 ? (
+              <div className="py-8 text-center">
+                <FileText className={`w-12 h-12 mx-auto mb-3 ${theme.textMuted} opacity-30`} />
+                <p className={`text-sm ${theme.textMuted}`}>No upload history yet</p>
+                <p className={`text-xs ${theme.textMuted} mt-1`}>Your uploads will appear here</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {uploadHistory.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => onHistoryClick(item)}
+                    className={`w-full text-left p-3 rounded-lg transition-all cursor-pointer ${
+                      selectedHistory === item.id
+                        ? 'bg-linear-to-r from-[#6366F1] to-[#8B5CF6] text-white shadow-lg shadow-[#6366F1]/20'
+                        : `${theme.historyItemBg} ${theme.historyItemHover} ${theme.historyItemText} border ${theme.cardBorder}`
+                    }`}
+                  >
+                    <div className="flex items-start gap-2">
+                      {item.type === 'pdf' ? (
+                        <FileText className={`w-4 h-4 mt-0.5 shrink-0 ${selectedHistory === item.id ? 'text-white' : 'text-[#6366F1]'}`} />
+                      ) : (
+                        <FileText className={`w-4 h-4 mt-0.5 shrink-0 ${selectedHistory === item.id ? 'text-white' : 'text-[#22D3EE]'}`} />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className={`font-medium text-sm truncate ${selectedHistory === item.id ? 'text-white' : theme.text}`}>
+                          {item.title}
+                        </p>
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <Clock className={`w-3 h-3 ${selectedHistory === item.id ? 'text-white/80' : theme.textMuted}`} />
+                          <span className={`text-xs ${selectedHistory === item.id ? 'text-white/80' : theme.textMuted}`}>
+                            {item.timestamp}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </button>
-              ))}
-            </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
+        </div>
         </div>
       )}
 
