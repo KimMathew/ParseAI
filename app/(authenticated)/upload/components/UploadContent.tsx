@@ -24,6 +24,7 @@ type UploadContentProps = {
   userId?: string | null;
   pdfTitle?: string;
   uploadDate?: string;
+  sidebarOpen?: boolean;
 };
 
 export default function UploadContent(props: UploadContentProps) {
@@ -54,6 +55,7 @@ export default function UploadContent(props: UploadContentProps) {
           userId={props.userId}
           pdfTitle={props.pdfTitle}
           uploadDate={props.uploadDate}
+          sidebarOpen={props.sidebarOpen}
         />
       )}
     </div>

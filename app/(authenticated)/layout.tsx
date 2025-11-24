@@ -12,6 +12,7 @@ const supabase = createClient();
 import { getDocumentsByUser, getSummaryByDocumentId } from '@/lib/supabaseApi';
 import { HistoryProvider, useHistory } from './HistoryContext';
 import { ThemeProvider, useTheme } from './ThemeContext';
+import { SidebarProvider, useSidebar } from './SidebarContext';
 
 
 export default function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
@@ -45,16 +46,18 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
   return (
     <ThemeProvider>
       <HistoryProvider onRefresh={() => setHistoryRefreshKey(k => k + 1)}>
-        <LayoutWrapper historyRefreshKey={historyRefreshKey} onHistoryRefresh={() => setHistoryRefreshKey(k => k + 1)}>
-          {children}
-        </LayoutWrapper>
+        <SidebarProvider>
+          <LayoutWrapper historyRefreshKey={historyRefreshKey} onHistoryRefresh={() => setHistoryRefreshKey(k => k + 1)}>
+            {children}
+          </LayoutWrapper>
+        </SidebarProvider>
       </HistoryProvider>
     </ThemeProvider>
   );
 }
 
 function LayoutWrapper({ children, historyRefreshKey, onHistoryRefresh }: { children: React.ReactNode, historyRefreshKey: number, onHistoryRefresh: () => void }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { sidebarOpen, setSidebarOpen } = useSidebar();
   const [selectedHistory, setSelectedHistory] = useState<number | null>(null);
   const { isDarkMode, toggleTheme } = useTheme();
   const [user, setUser] = useState<any>(null);
@@ -163,21 +166,6 @@ function LayoutWrapper({ children, historyRefreshKey, onHistoryRefresh }: { chil
     fetchHistory();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, historyRefreshKey]);
-
-  // Set sidebar open by default on desktop
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 1024) {
-        setSidebarOpen(true);
-      } else {
-        setSidebarOpen(false);
-      }
-    };
-    
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   const handleHistoryClick = (item: any) => {
     setSelectedHistory(item.id);
