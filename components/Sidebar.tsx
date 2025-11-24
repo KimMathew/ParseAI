@@ -74,7 +74,7 @@ export default function UploadSidebar({
           />
           {/* History Panel - appears to the right of sidebar */}
           <div 
-            className={`fixed left-24 top-100 -translate-y-1/2 ${isDarkMode ? 'bg-[#1F2937]' : 'bg-white'} border ${theme.cardBorder} rounded-xl shadow-2xl z-80 w-80 overflow-hidden`}
+            className={`fixed left-24 top-94 -translate-y-1/2 ${isDarkMode ? 'bg-[#1F2937]' : 'bg-white'} border ${theme.cardBorder} rounded-xl shadow-2xl z-80 w-80 overflow-hidden min-h-[400px]`}
           >
             {/* Header */}
             <div className="p-4 border-b border-border">

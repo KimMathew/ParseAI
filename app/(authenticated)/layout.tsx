@@ -6,7 +6,7 @@ import { toast, Toaster } from 'sonner';
 import { getTheme } from '@/lib/theme';
 import CustomToast from '@/components/CustomToast';
 import Sidebar from '@/components/Sidebar';
-import AnimatedBackground from './upload/components/AnimatedBackground';
+import AnimatedBackground from '@/components/AnimatedBackground';
 import { createClient } from '@/utils/supabase/client';
 const supabase = createClient();
 import { getDocumentsByUser, getSummaryByDocumentId } from '@/lib/supabaseApi';
