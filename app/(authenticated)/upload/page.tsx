@@ -89,9 +89,6 @@ export default function UploadPage({ onHistoryRefresh }: { onHistoryRefresh?: ()
   const handleDelete = async () => {
     if (!currentDocumentId) return;
 
-    const confirmed = confirm('Are you sure you want to delete this document? This action cannot be undone.');
-    if (!confirmed) return;
-
     try {
       // Get document details to find file_url
       const { data: doc, error: docError } = await supabase
