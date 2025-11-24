@@ -59,6 +59,7 @@ function LayoutWrapper({ children, historyRefreshKey, onHistoryRefresh }: { chil
   const { isDarkMode, toggleTheme } = useTheme();
   const [user, setUser] = useState<any>(null);
   const [uploadHistory, setUploadHistory] = useState<any[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 
   // Fetch user from Supabase auth
   useEffect(() => {
@@ -116,8 +117,12 @@ function LayoutWrapper({ children, historyRefreshKey, onHistoryRefresh }: { chil
   // Fetch upload history for this user
   const fetchHistory = async () => {
     if (!user?.id) return;
+    setIsLoadingHistory(true);
     const { data: docs, error } = await getDocumentsByUser(user.id);
-    if (error) return;
+    if (error) {
+      setIsLoadingHistory(false);
+      return;
+    }
     const items = await Promise.all((docs || []).map(async (doc: any) => {
       const { data: summary } = await getSummaryByDocumentId(doc.id);
       let parsedDefinitions = null;
@@ -151,6 +156,7 @@ function LayoutWrapper({ children, historyRefreshKey, onHistoryRefresh }: { chil
       };
     }));
     setUploadHistory(items);
+    setIsLoadingHistory(false);
   };
 
   useEffect(() => {
@@ -202,6 +208,7 @@ function LayoutWrapper({ children, historyRefreshKey, onHistoryRefresh }: { chil
       onThemeToggle={toggleTheme}
       user={user}
       uploadHistory={uploadHistory}
+      isLoadingHistory={isLoadingHistory}
       handleHistoryClick={handleHistoryClick}
       handleNewUpload={handleNewUpload}
       theme={theme}
@@ -220,7 +227,8 @@ function LayoutContent({
   isDarkMode, 
   onThemeToggle, 
   user, 
-  uploadHistory, 
+  uploadHistory,
+  isLoadingHistory,
   handleHistoryClick, 
   handleNewUpload, 
   theme, 
@@ -259,6 +267,7 @@ function LayoutContent({
           theme={theme}
           user={user ?? { name: '', email: '', avatar: 'U' }}
           uploadHistory={uploadHistory}
+          isLoadingHistory={isLoadingHistory}
           onHistoryClick={onHistoryClick}
           onNewUpload={onNewUpload}
           isCollapsed={!sidebarOpen}
