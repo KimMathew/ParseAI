@@ -74,7 +74,7 @@ export default function UploadSidebar({
           />
           {/* History Panel - appears to the right of sidebar */}
           <div 
-            className={`fixed left-24 top-94 -translate-y-1/2 ${isDarkMode ? 'bg-[#1F2937]' : 'bg-white'} border ${theme.cardBorder} rounded-xl shadow-2xl z-80 w-80 overflow-hidden min-h-[400px]`}
+            className={`fixed left-24 top-94 -translate-y-1/2 ${isDarkMode ? 'bg-[#1F2937]' : 'bg-white'} border ${theme.cardBorder} rounded-xl shadow-2xl z-80 w-80 overflow-hidden h-[400px] flex flex-col`}
           >
             {/* Header */}
             <div className="p-4 border-b border-border">
@@ -88,7 +88,7 @@ export default function UploadSidebar({
               </div>
             </div>
             {/* History List */}
-            <div className="overflow-y-auto max-h-[400px] upload-history-popover-scroll">
+            <div className="flex-1 overflow-y-auto upload-history-popover-scroll">
               <style jsx>{`
                 .upload-history-popover-scroll::-webkit-scrollbar {
                   width: 10px;
@@ -271,7 +271,8 @@ export default function UploadSidebar({
 
       {/* Upload History List */}
       {!isCollapsed && (
-        <div className="flex-1 overflow-y-auto min-h-0 upload-history-scroll">
+        <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+        <div className="h-[400px] overflow-y-auto upload-history-scroll">
           <style jsx>{`
             .upload-history-scroll::-webkit-scrollbar {
               width: 14px;
@@ -329,6 +330,7 @@ export default function UploadSidebar({
               ))}
             </div>
           </div>
+        </div>
         </div>
       )}
 
