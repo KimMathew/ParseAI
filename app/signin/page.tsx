@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import InputField from "@/components/InputField";
 import MeshGradient from "@/components/MeshGradient";
@@ -8,14 +10,44 @@ import { createClient } from '@/utils/supabase/client';
 const supabase = createClient();
 
 export default function Signin() {
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  useEffect(() => {
+    // Check for success/error messages from URL params
+    if (!searchParams) return;
+    
+    const verified = searchParams.get('verified');
+    const signup = searchParams.get('signup');
+    const error = searchParams.get('error');
+
+    if (verified === 'true') {
+      setSuccessMessage('Email verified successfully! You can now sign in.');
+    } else if (signup === 'success') {
+      setSuccessMessage('Account created! Please check your email to verify your account before signing in.');
+    } else if (error === 'verification_failed') {
+      setError('Email verification failed. Please try again or contact support.');
+    }
+  }, [searchParams]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    
+    if (!isValidEmail(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    
     setIsLoading(true);
     try {
       const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -238,6 +270,18 @@ export default function Signin() {
             </div>
           </div>
         </div>
+
+        {successMessage && (
+            <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3 text-green-400 text-sm">
+              {successMessage}
+            </div>
+          )}
+
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-red-400 text-sm">
+              {error}
+            </div>
+          )}
 
         {/* CSS Animations */}
         <style jsx>{`
