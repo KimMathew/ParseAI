@@ -245,7 +245,7 @@ export default function UploadSidebar({
           <div className={`flex-1 min-w-0 overflow-hidden transition-all duration-300 ${
             isCollapsed ? 'opacity-0 w-0' : 'opacity-100 delay-75'
           }`}>
-            <h1 className={`text-lg font-bold ${theme.text} mb-0.5 whitespace-nowrap`}>PARSe AI</h1>
+            <h1 className={`text-lg font-bold ${theme.text} mb-0.5 whitespace-nowrap`}>PARSeAI</h1>
             <p className={`text-xs ${theme.textMuted} leading-tight whitespace-nowrap`}>
               Paper Analysis & Research Summarizer
             </p>
