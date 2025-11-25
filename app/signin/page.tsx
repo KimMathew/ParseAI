@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import InputField from "@/components/InputField";
 import MeshGradient from "@/components/MeshGradient";
+import ErrorModal from "@/components/ErrorModal";
 import { createClient } from '@/utils/supabase/client';
 const supabase = createClient();
 
@@ -91,6 +92,8 @@ export default function Signin() {
 
           {/* Login Form */}
           <form onSubmit={handleSignIn} className="space-y-5 mb-6">
+
+
             {/* Email Input */}
             <InputField
               id="email"
@@ -114,12 +117,6 @@ export default function Signin() {
               helperLink={{ text: "Forgot password?", href: "/password_reset" }}
             />
 
-            {error && (
-              <div className="text-red-500 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3">
-                {error}
-              </div>
-            )}
-
             {/* Sign In Button */}
             <button
               type="submit"
@@ -141,26 +138,22 @@ export default function Signin() {
             </Link>
           </p>
 
-          <div className="mt-6">
+          <div className="mt-4">
             {successMessage && (
-              <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3 text-green-400 text-sm">
-                {successMessage}
-              </div>
-            )}
-
-            {error && (
-              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-red-400 text-sm">
-                {error}
-              </div>
-            )}
+                <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3 text-green-400 text-sm">
+                  {successMessage}
+                </div>
+              )}
           </div>
-          
         </div>
-
-        
       </div>
 
-      
+      {/* Error Modal */}
+      <ErrorModal
+        show={!!error}
+        message={error || ""}
+        onClose={() => setError(null)}
+      />
 
       {/* Right Column - Brand Section */}
       <div className="hidden lg:flex flex-1 relative overflow-hidden p-6">

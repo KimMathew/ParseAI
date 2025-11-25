@@ -5,6 +5,7 @@ import { useState } from "react";
 import Link from "next/link";
 import InputField from "@/components/InputField";
 import MeshGradient from "@/components/MeshGradient";
+import ErrorModal from "@/components/ErrorModal";
 import { createClient } from '@/utils/supabase/client';
 const supabase = createClient();
 import { createUser } from "@/lib/supabaseApi";
@@ -107,12 +108,6 @@ export default function Signup() {
 
           {/* Signup Form */}
           <form onSubmit={handleSignUp} className="space-y-5 mb-6">
-            {error && (
-              <div className="text-red-500 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3">
-                {error}
-              </div>
-            )}
-            
             {/* Name Input */}
             <InputField
               id="name"
@@ -179,6 +174,13 @@ export default function Signup() {
           </p>
         </div>
       </div>
+
+      {/* Error Modal */}
+      <ErrorModal
+        show={!!error}
+        message={error || ""}
+        onClose={() => setError(null)}
+      />
 
       {/* Right Column - Brand Section */}
       <div className="hidden lg:flex flex-1 relative overflow-hidden p-6">
