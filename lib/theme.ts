@@ -1,0 +1,28 @@
+export const getTheme = (isDarkMode: boolean) => ({
+    bg: isDarkMode ? 'bg-[#0B0C10]' : 'bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50',
+    sidebarBg: isDarkMode ? 'bg-[#1F2937]/80 backdrop-blur-xl' : 'bg-white',
+    sidebarBorder: isDarkMode ? 'border-white/10' : 'border-slate-200',
+    headerBg: isDarkMode ? 'bg-[#1F2937]/80 backdrop-blur-xl' : 'bg-white',
+    cardBg: isDarkMode ? 'bg-white/5 backdrop-blur-xl' : 'bg-white',
+    cardBorder: isDarkMode ? 'border-white/10' : 'border-slate-200',
+    text: isDarkMode ? 'text-white' : 'text-slate-900',
+    textSecondary: isDarkMode ? 'text-white/70' : 'text-slate-600',
+    textTertiary: isDarkMode ? 'text-white/60' : 'text-slate-500',
+    textMuted: isDarkMode ? 'text-white/50' : 'text-slate-400',
+    inputBg: isDarkMode ? 'bg-white/5' : 'bg-white',
+    inputBorder: isDarkMode ? 'border-white/10' : 'border-slate-300',
+    inputText: isDarkMode ? 'text-white' : 'text-slate-900',
+    inputPlaceholder: isDarkMode ? 'placeholder:text-white/40' : 'placeholder:text-slate-400',
+    hoverBg: isDarkMode ? 'hover:bg-white/10' : 'hover:bg-slate-100',
+    buttonHover: isDarkMode ? 'hover:bg-white/20' : 'hover:bg-slate-200',
+    historyItemBg: isDarkMode ? 'bg-white/5' : 'bg-slate-50',
+    historyItemHover: isDarkMode ? 'hover:bg-white/10' : 'hover:bg-slate-100',
+    historyItemText: isDarkMode ? 'text-white/90' : 'text-slate-700',
+    uploadBorder: isDarkMode ? 'border-white/20' : 'border-slate-300',
+    uploadHoverBorder: isDarkMode ? 'hover:border-[#6366F1]' : 'hover:border-[#6366F1]',
+    uploadHoverBg: isDarkMode ? 'hover:bg-[#6366F1]/5' : 'hover:bg-[#6366F1]/5',
+    tabInactive: isDarkMode ? 'text-white/70' : 'text-slate-600',
+    tabInactiveBg: isDarkMode ? 'hover:bg-white/5' : 'hover:bg-slate-100',
+});
+
+export type Theme = ReturnType<typeof getTheme>;

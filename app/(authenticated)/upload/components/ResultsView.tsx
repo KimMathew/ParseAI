@@ -1,0 +1,369 @@
+"use client";
+
+import React from 'react';
+import { createClient } from '@/utils/supabase/client';
+const supabase = createClient();
+import { Download, Trash, Lightbulb, FileText, Beaker, BarChart3, CheckCircle2, BookOpen, Copy, ChevronDown, ChevronUp } from 'lucide-react';
+import DeleteModal from '@/components/DeleteModal';
+import ChatSidebar from '@/components/Chat';
+
+type ResultsViewProps = {
+  showChat: boolean;
+  isDarkMode: boolean;
+  theme: any;
+  onShowChat: (show: boolean) => void;
+  onDelete: () => void;
+  summaryResult: Record<string, string> | null;
+  documentId?: string | number | null;
+  userId?: string | null;
+  pdfTitle?: string;
+  uploadDate?: string;
+  sidebarOpen?: boolean;
+};
+
+export default function ResultsView({
+  showChat,
+  isDarkMode,
+  theme,
+  onShowChat,
+  onDelete,
+  summaryResult,
+  documentId,
+  userId,
+  pdfTitle,
+  uploadDate,
+  sidebarOpen = true,
+}: ResultsViewProps) {
+  const [expandedSections, setExpandedSections] = React.useState<Record<string, boolean>>({});
+  const [copiedSection, setCopiedSection] = React.useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = React.useState(false);
+  const [isDeleting, setIsDeleting] = React.useState(false);
+
+  // Reset delete modal state when document changes
+  React.useEffect(() => {
+    setShowDeleteModal(false);
+    setIsDeleting(false);
+  }, [documentId]);
+
+  const toggleSection = (section: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  const copyToClipboard = async (text: string, section: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedSection(section);
+      setTimeout(() => setCopiedSection(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
+
+  const truncateText = (text: string, maxLength: number = 400) => {
+    if (text.length <= maxLength) return { text, isTruncated: false };
+    const truncated = text.substring(0, maxLength);
+    const lastSpace = truncated.lastIndexOf(' ');
+    return {
+      text: truncated.substring(0, lastSpace) + '...',
+      isTruncated: true
+    };
+  };
+
+  // Download PDF logic
+  const handleDownload = async () => {
+    if (!documentId) return;
+    // Fetch document record from Supabase
+    const { data, error } = await supabase
+      .from('documents')
+      .select('file_url, file_type, title')
+      .eq('id', documentId)
+      .single();
+    if (error || !data?.file_url) {
+      alert('Could not find file for this document.');
+      return;
+    }
+    // Fix: Supabase public URL must be /storage/v1/object/public/<bucket>/<path>
+    // If file_url already includes the bucket, remove it
+    // Use Supabase's getPublicUrl (if bucket is public) or createSignedUrl (if not)
+    // Always use signed URL for private bucket
+    const filePath = data.file_url;
+    const { data: signedData, error: signedError } = await supabase.storage.from('documents').createSignedUrl(filePath, 120);
+    if (signedData?.signedUrl) {
+      try {
+        const response = await fetch(signedData.signedUrl);
+        if (!response.ok) throw new Error('Failed to fetch file');
+        const blob = await response.blob();
+        const a = document.createElement('a');
+        a.href = window.URL.createObjectURL(blob);
+        let filename = 'document.pdf';
+        if (data.title) {
+          filename = data.title.match(/\.pdf$/i) ? data.title : `${data.title}.pdf`;
+        }
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          window.URL.revokeObjectURL(a.href);
+          document.body.removeChild(a);
+        }, 100);
+      } catch (err) {
+        alert('Failed to download file.');
+      }
+    } else {
+      alert('Could not generate a download link.');
+    }
+  };
+
+  // Delete handler - delegates to parent component
+  const handleDelete = () => {
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await onDelete();
+      // Modal will be closed by the parent after successful deletion
+    } catch (error) {
+      // If deletion fails, reset the deleting state
+      setIsDeleting(false);
+    }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+  };
+
+  return (
+    <>
+      <div className="max-w-5xl mx-auto w-full">
+        {/* Paper Info Card */}
+        <div className={`${theme.cardBg} ${isDarkMode ? 'backdrop-blur-xl' : ''} rounded-xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6`} style={{ border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                <h3 className={`text-base sm:text-lg md:text-xl font-bold ${theme.text}`}>
+                  {pdfTitle || 'Paper Summary'}
+                </h3>
+                <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-gray-500/20 text-gray-400 border border-gray-500/30">
+                  PDF
+                </span>
+              </div>
+              <p className={`text-xs sm:text-sm ${theme.textTertiary}`}>
+                {uploadDate || 'Results generated by PARSeAI'}
+              </p>
+            </div>
+            <div className="flex gap-2 shrink-0">
+              <button className={`p-1.5 sm:p-2 ${theme.hoverBg} rounded-lg transition-colors cursor-pointer`} title="Download" onClick={handleDownload}>
+                <Download className={`w-4 h-4 sm:w-5 sm:h-5 ${theme.textSecondary}`} />
+              </button>
+              <button
+                className={`group p-1.5 sm:p-2 ${theme.hoverBg} rounded-lg transition-colors cursor-pointer`}
+                title="Delete"
+                onClick={handleDelete}
+              >
+                <Trash
+                  className={`w-4 h-4 sm:w-5 sm:h-5 ${theme.textSecondary} group-hover:text-red-500`}
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Summaries Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+          {summaryResult && Object.keys(summaryResult).length > 0 ? (
+            <>
+              {/* Main Sections */}
+              {['Abstract', 'Introduction', 'Methodology', 'Results', 'Conclusion'].map((section, idx) => {
+                if (!summaryResult[section]) return null;
+                // Unique gradients for each card for better distinction
+                const gradients = [
+                  // Abstract: Indigo/Purple
+                  'linear-gradient(135deg, rgba(99,102,241,0.85) 0%, rgba(139,92,246,0.85) 100%)',
+                  // Introduction: Teal/Cyan
+                  'linear-gradient(135deg, rgba(34,211,238,0.85) 0%, rgba(16,185,129,0.85) 100%)',
+                  // Methodology: Purple/Deep Purple
+                  'linear-gradient(135deg, rgba(168,85,247,0.85) 0%, rgba(109,40,217,0.85) 100%)',
+                  // Results: Blue/Sky
+                  'linear-gradient(135deg, rgba(59,130,246,0.85) 0%, rgba(14,165,233,0.85) 100%)',
+                  // Conclusion: Fuchsia/Pink
+                  'linear-gradient(135deg, rgba(232,121,249,0.85) 0%, rgba(236,72,153,0.85) 100%)'
+                ];
+                const icons = [
+                  <FileText className="w-4 h-4 sm:w-5 sm:h-5" key="abstract" />,
+                  <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" key="intro" />,
+                  <Beaker className="w-4 h-4 sm:w-5 sm:h-5" key="method" />,
+                  <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5" key="results" />,
+                  <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" key="conclusion" />
+                ];
+                const content = summaryResult[section];
+                const { text: displayText, isTruncated } = truncateText(content);
+                const isExpanded = expandedSections[section];
+                
+                return (
+                  <div 
+                    key={section} 
+                    className={`${theme.cardBg} ${isDarkMode ? 'backdrop-blur-xl' : ''} rounded-xl shadow-lg p-4 sm:p-6 transition-all duration-300 hover:-translate-y-1 relative`}
+                    style={{ border: '1px solid rgba(255, 255, 255, 0.08)' }}
+                  >
+                    <div className="flex items-start justify-between mb-4 gap-2">
+                      <h4 className={`text-base sm:text-lg font-bold flex items-center gap-2 ${theme.text}`}>
+                        <span 
+                          className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-white border border-white/30"
+                          style={{ background: gradients[idx] }}
+                        >
+                          {icons[idx]}
+                        </span>
+                        {section}
+                      </h4>
+                      <button
+                        onClick={() => copyToClipboard(content, section)}
+                        className={`p-1.5 rounded-lg transition-all ${theme.hoverBg} shrink-0 cursor-pointer`}
+                        title="Copy to clipboard"
+                      >
+                        {copiedSection === section ? (
+                          <CheckCircle2 className="w-4 h-4 text-green-500" />
+                        ) : (
+                          <Copy className="w-4 h-4 text-gray-400 hover:text-gray-300" />
+                        )}
+                      </button>
+                    </div>
+                    <p className="leading-relaxed text-sm sm:text-base text-justify" style={{ lineHeight: '1.7', color: isDarkMode ? '#D1D5DB' : '#4B5563' }}>
+                      {isExpanded || !isTruncated ? content : displayText}
+                    </p>
+                    {isTruncated && (
+                      <button
+                        onClick={() => toggleSection(section)}
+                        className={`mt-3 flex items-center gap-1 text-sm font-medium transition-colors cursor-pointer ${
+                          isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'
+                        }`}
+                      >
+                        {isExpanded ? (
+                          <>
+                            Show Less <ChevronUp className="w-4 h-4" />
+                          </>
+                        ) : (
+                          <>
+                            Show More <ChevronDown className="w-4 h-4" />
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+
+              {/* Keyword Definitions Section */}
+              {summaryResult["Definitions"] && typeof summaryResult["Definitions"] === 'object' && Object.keys(summaryResult["Definitions"]).length > 0 && (() => {
+                const definitionsText = Object.entries(summaryResult["Definitions"])
+                  .map(([kw, def]) => `${kw}: ${def}`)
+                  .join('\n\n');
+                const { text: displayText, isTruncated } = truncateText(definitionsText, 400);
+                const isExpanded = expandedSections["Definitions"];
+
+                return (
+                  <div 
+                    className={`${theme.cardBg} ${isDarkMode ? 'backdrop-blur-xl' : ''} rounded-xl shadow-lg p-4 sm:p-6 transition-all duration-300 hover:-translate-y-1 relative`}
+                    style={{ border: '1px solid rgba(255, 255, 255, 0.08)' }}
+                  >
+                    <div className="flex items-start justify-between mb-4 gap-2">
+                      <h4 className={`text-base sm:text-lg font-bold flex items-center gap-2 ${theme.text}`}>
+                        <span 
+                          className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-white border border-white/30"
+                          style={{ background: 'linear-gradient(160deg, rgba(251,191,36,0.8) 0%, rgba(217,119,6,0.8) 60%, rgba(161,98,7,1) 100%)' }}
+                        >
+                          <Lightbulb className="w-4 h-4 sm:w-5 sm:h-5" />
+                        </span>
+                        Keyword Definitions
+                      </h4>
+                      <button
+                        onClick={() => copyToClipboard(JSON.stringify(summaryResult["Definitions"], null, 2), "Definitions")}
+                        className={`p-1.5 rounded-lg transition-all ${theme.hoverBg} shrink-0 cursor-pointer`}
+                        title="Copy to clipboard"
+                      >
+                        {copiedSection === "Definitions" ? (
+                          <CheckCircle2 className="w-4 h-4 text-green-500" />
+                        ) : (
+                          <Copy className="w-4 h-4 text-gray-400 hover:text-gray-300" />
+                        )}
+                      </button>
+                    </div>
+                    <div className="flex flex-col gap-3">
+                      {Object.entries(summaryResult["Definitions"])
+                        .slice(0, isExpanded || !isTruncated ? undefined : 2)
+                        .map(([keyword, definition]) => (
+                          <div key={keyword} className="flex flex-col gap-1.5">
+                            <span 
+                              className="inline-block px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-full border transition-colors w-fit"
+                              style={{ 
+                                backgroundColor: 'rgba(251, 191, 36, 0.15)',
+                                borderColor: 'rgba(251, 191, 36, 0.4)',
+                                color: isDarkMode ? '#FCD34D' : '#D97706'
+                              }}
+                            >
+                              {keyword}
+                            </span>
+                            <p className={`text-sm leading-relaxed ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                              {String(definition)}
+                            </p>
+                          </div>
+                        ))}
+                    </div>
+                    {Object.keys(summaryResult["Definitions"]).length > 2 && (
+                      <button
+                        onClick={() => toggleSection("Definitions")}
+                        className={`mt-3 flex items-center gap-1 text-sm font-medium transition-colors cursor-pointer ${
+                          isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'
+                        }`}
+                      >
+                        {isExpanded ? (
+                          <>
+                            Show Less <ChevronUp className="w-4 h-4" />
+                          </>
+                        ) : (
+                          <>
+                            Show More <ChevronDown className="w-4 h-4" />
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                );
+              })()}
+            </>
+          ) : (
+            <div className="text-center text-white/70 py-8">No summary available.</div>
+          )}
+        </div>
+      </div>
+
+      {/* Chat Sidebar */}
+      {showChat && (
+        <ChatSidebar
+          isDarkMode={isDarkMode}
+          theme={theme}
+          onClose={() => onShowChat(false)}
+          documentId={documentId ?? null}
+          userId={userId ?? null}
+          uploadDate={uploadDate}
+        />
+      )}
+      
+      {/* Delete Confirmation Modal */}
+      <DeleteModal
+        show={showDeleteModal}
+        isDarkMode={isDarkMode}
+        theme={theme}
+        pdfTitle={pdfTitle}
+        onCancel={cancelDelete}
+        onConfirm={confirmDelete}
+        sidebarOpen={sidebarOpen}
+        isDeleting={isDeleting}
+      />
+    </>
+  );
+}
