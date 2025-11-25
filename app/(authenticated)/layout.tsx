@@ -69,11 +69,20 @@ function LayoutWrapper({ children, historyRefreshKey, onHistoryRefresh }: { chil
     const fetchUser = async () => {
       const { data, error } = await supabase.auth.getUser();
       if (data?.user) {
-        let avatarSource = data.user.user_metadata?.name || data.user.email || '';
+        // Get the display name - either from metadata or extract from email
+        let displayName = data.user.user_metadata?.name || data.user.user_metadata?.full_name;
+        
+        // If no name in metadata, extract username from email (part before @)
+        if (!displayName && data.user.email) {
+          displayName = data.user.email.split('@')[0];
+        }
+        
+        let avatarSource = displayName || data.user.email || '';
         let avatar = avatarSource.trim().length > 0 ? avatarSource.slice(0, 2).toUpperCase() : 'U';
+        
         setUser({
           id: data.user.id,
-          name: data.user.user_metadata?.name || data.user.email,
+          name: displayName || 'User',
           email: data.user.email,
           avatar,
         });
