@@ -12,10 +12,21 @@ export default function PasswordReset() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccess(false);
+    
+    if (!isValidEmail(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    
     setIsLoading(true);
 
     try {
@@ -72,7 +83,9 @@ export default function PasswordReset() {
             />
 
             {error && (
-              <div className="text-red-500 text-sm text-center">{error}</div>
+              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-red-400 text-sm">
+                {error}
+              </div>
             )}
 
             {/* Submit Button */}

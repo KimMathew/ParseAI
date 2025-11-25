@@ -17,9 +17,20 @@ export default function Signup() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    
+    if (!isValidEmail(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
@@ -30,6 +41,9 @@ export default function Signup() {
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
       });
       if (signUpError) {
         setError(signUpError.message);
@@ -61,7 +75,8 @@ export default function Signup() {
         return;
       }
       setIsLoading(false);
-      alert("Account created! Please check your email to verify.");
+      // Redirect to signin with message
+      window.location.href = "/signin?signup=success";
     } catch (err: any) {
       setError(err.message || "An error occurred.");
       setIsLoading(false);
@@ -89,7 +104,9 @@ export default function Signup() {
         {/* Signup Form */}
         <form onSubmit={handleSignUp} className="space-y-4 mb-6">
           {error && (
-            <div className="text-red-500 text-sm text-center">{error}</div>
+            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-red-400 text-sm">
+              {error}
+            </div>
           )}
           
           {/* Name Input */}
