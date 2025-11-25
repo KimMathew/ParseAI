@@ -1,7 +1,7 @@
 "use client";
 
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import InputField from "@/components/InputField";
@@ -10,7 +10,7 @@ import ErrorModal from "@/components/ErrorModal";
 import { createClient } from '@/utils/supabase/client';
 const supabase = createClient();
 
-export default function Signin() {
+function SigninForm() {
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -328,5 +328,17 @@ export default function Signin() {
         `}</style>
       </div>
     </main>
+  );
+}
+
+export default function Signin() {
+  return (
+    <Suspense fallback={
+      <main className="h-screen overflow-hidden bg-[#0B0C10] text-white flex items-center justify-center">
+        <div className="text-white/60">Loading...</div>
+      </main>
+    }>
+      <SigninForm />
+    </Suspense>
   );
 }
