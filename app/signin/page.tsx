@@ -334,7 +334,7 @@ function SigninForm() {
 export default function Signin() {
   return (
     <Suspense fallback={
-      <main className="h-screen overflow-hidden bg-[#0B0C10] text-white flex items-center justify-center">
+      <main className="h-screen overflow-hidden bg-[#0B0C10] text-white justify-center flex items-center ">
         <div className="text-white/60">Loading...</div>
       </main>
     }>
