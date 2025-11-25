@@ -271,18 +271,6 @@ export default function Signin() {
           </div>
         </div>
 
-        {successMessage && (
-            <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3 text-green-400 text-sm">
-              {successMessage}
-            </div>
-          )}
-
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-red-400 text-sm">
-              {error}
-            </div>
-          )}
-
         {/* CSS Animations */}
         <style jsx>{`
           @keyframes float-slow {

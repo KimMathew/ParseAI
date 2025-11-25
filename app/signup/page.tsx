@@ -271,26 +271,6 @@ export default function Signup() {
           </p>
         </div>
 
-        {/* Signup Form */}
-        <form onSubmit={handleSignUp} className="space-y-4 mb-6">
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-red-400 text-sm">
-              {error}
-            </div>
-          )}
-          
-          {/* Name Input */}
-          <InputField
-            id="name"
-            label="Name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Enter your name"
-            required
-          />
-        </form>
-
         {/* CSS Animations */}
         <style jsx>{`
           @keyframes float-1 {
