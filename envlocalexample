@@ -1,0 +1,13 @@
+# Backend API Configuration
+# For local development, use:
+# NEXT_PUBLIC_API_URL=http://127.0.0.1:8000
+
+# For Cloudflare Tunnel, replace with your tunnel URL:
+# NEXT_PUBLIC_API_URL=https://your-tunnel-url.trycloudflare.com
+
+NEXT_PUBLIC_API_URL=http://127.0.0.1:8000
+
+# Supabase Configuration (existing)
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key

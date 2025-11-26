@@ -5,6 +5,7 @@ import { MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
 import { getTheme } from '@/lib/theme';
 import CustomToast from '@/components/CustomToast';
+import { getApiUrl } from '@/lib/apiConfig';
 import UploadContent from './components/UploadContent';
 import { createClient } from '@/utils/supabase/client';
 const supabase = createClient();
@@ -236,13 +237,13 @@ export default function UploadPage({ onHistoryRefresh }: { onHistoryRefresh?: ()
       if (file) {
         const fd = new FormData();
         fd.append("file", file);
-        res = await fetch("http://127.0.0.1:8000/summarize", {
+        res = await fetch(getApiUrl('summarize'), {
           method: "POST",
           body: fd,
           cache: "no-store",
         });
       } else {
-        res = await fetch("http://127.0.0.1:8000/summarize", {
+        res = await fetch(getApiUrl('summarize'), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ text }),

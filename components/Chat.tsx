@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { MessageSquare } from 'lucide-react';
+import { getApiUrl } from '@/lib/apiConfig';
 
 // Typing indicator component
 const TypingIndicator = ({ isDarkMode, theme }: { isDarkMode: boolean; theme: any }) => (
@@ -115,7 +116,7 @@ export default function ChatSidebar({
     if (!documentId) return;
     setMessages([]);
     setError(null);
-    fetch(`http://127.0.0.1:8000/chat/${documentId}`)
+    fetch(getApiUrl(`chat/${documentId}`))
       .then(res => res.json())
       .then(data => {
         setMessages(Array.isArray(data.chats) ? data.chats : []);
@@ -151,7 +152,7 @@ export default function ChatSidebar({
       },
     ]);
     try {
-      const res = await fetch('http://127.0.0.1:8000/chat', {
+      const res = await fetch(getApiUrl('chat'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, document_id: documentId, question: questionToSend }),
