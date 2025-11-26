@@ -327,6 +327,17 @@ export default function UploadPage({ onHistoryRefresh }: { onHistoryRefresh?: ()
         return;
       }
       setCurrentDocumentId(document.id);
+      
+      // Update the history context with the newly created document
+      setSelectedHistoryItem({
+        id: document.id,
+        title: data.Title || docTitle,
+        created_at: new Date().toISOString(),
+        summaryResult: data,
+        file_url: file_url || '',
+        type: file_type,
+      });
+      
       // Success notification
       toast.custom((t) => (
         <CustomToast
